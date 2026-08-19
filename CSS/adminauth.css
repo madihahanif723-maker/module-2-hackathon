@@ -187,3 +187,48 @@ body {
     margin-bottom: 20px !important; /* Spacing text aur inputs ke beech */
     line-height: 1.4;
 }
+/* ==========================================
+   SWEETALERT2 DARK THEME CUSTOMIZATION
+   ========================================== */
+.swal2-popup {
+    background-color: #15222e !important;
+    color: #f8fafc !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+.swal2-title {
+    color: #f8fafc !important;
+    font-size: 1.4rem !important;
+}
+
+.swal2-html-container {
+    color: #94a3b8 !important;
+}
+
+/* Confirm Button (Rose Red for Delete) */
+.swal2-confirm {
+    background-color: #e11d48 !important;
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3) !important;
+    padding: 10px 24px !important;
+}
+
+.swal2-confirm:focus {
+    box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.5) !important;
+}
+
+/* Cancel Button */
+.swal2-cancel {
+    background-color: #334155 !important;
+    color: #f8fafc !important;
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    padding: 10px 24px !important;
+}
+
+.swal2-cancel:hover {
+    background-color: #475569 !important;
+}

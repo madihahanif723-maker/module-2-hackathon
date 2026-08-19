@@ -122,37 +122,6 @@ async function adminLogin(event) {
         });
     }
 }
-// async function loginWithGoogle() {
-//     console.log("Google button clicked");
-//     try {
-//          const { data, error } = await supabase.auth.signInWithOAuth({
-//         provider: "google",
-//         options: {
-//             redirectTo: `${window.location.origin}/dashboard.html`
-//             // redirectTo: 'http://127.0.0.1:5500/dashboard.html'    
-//             //redirectTo: 'https://rafiapanjwani7-afk.github.io/post_app/dashboard.html'
-//         }
-//     });
-
-//     console.log(data);
-//     console.log(error);
-
-//     if (error) {
-//         Swal.fire({
-//             icon: "error",
-//             title: "OAuth Error",
-//             text: err.message,
-//             background: '#15222e',
-//             color: '#f3f4f6'
-//         });
-//     }
-//     } catch (error) {
-//         console.log(error);
-        
-//     }
-
-   
-// }
 
 // Google Redirect check
 supabase.auth.onAuthStateChange(async (event, session) => {
@@ -172,8 +141,6 @@ supabase.auth.onAuthStateChange(async (event, session) => {
         window.location.href = "adminpanel.html";
     }
 });
-
-window.loginWithGoogle = loginWithGoogle;
 window.adminSignup = adminSignup;
 window.adminLogin = adminLogin;
 

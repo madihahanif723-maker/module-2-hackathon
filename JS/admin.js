@@ -9,7 +9,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 async function checkAdmin() {
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error || !user) {
-        window.location.href = "adminlogin.html";
+        window.location.href = "index.html";
         return;
     }
     const userRole = user.user_metadata?.role;
@@ -28,7 +28,6 @@ async function checkAdmin() {
     console.log("Welcome admin!", user.email);
     await loadStats();
     await loadAllPost();
-    await loadAllComments();
     await loadAllUsers();
 }
 
@@ -93,7 +92,7 @@ async function deleteUser(userId) {
         text: "Kya aap waqai is user ko delete karna chahte hain? Iske saare posts bhi delete ho jayenge!",
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#ef4444', // Red color for delete
+        confirmButtonColor: '#ef4444', 
         cancelButtonColor: '#4b5563',  // Gray color for cancel
         confirmButtonText: 'Yes, delete user!',
         cancelButtonText: 'Cancel',
@@ -260,11 +259,6 @@ async function loadAllPost() {
                     <td class="text-truncate" style="max-width: 250px;">${post.description || ''}</td>
                     <td>
                         <div class="d-flex flex-column gap-2" style="max-width: 100px;">
-        <button class="btn btn-sm btn-outline-info px-3 w-100" 
-                onclick="openEditMode('${post.id}', '${post.title}', '${post.description}')"
-                style="border-radius: 6px; font-weight: 500; transition: all 0.2s ease;">
-            <i class="bi bi-pencil-square me-1"></i> Edit
-        </button>
 
         <button class="btn btn-sm btn-outline-danger px-3 w-100" 
                 onclick="deletePost('${post.id}')"
@@ -278,116 +272,6 @@ async function loadAllPost() {
         });
     } catch (err) {
         console.error("Error loading posts:", err);
-    }
-}
-// 3. Load Comments Table
-async function loadAllComments() {
-    try {
-        const { data: comments, error } = await supabase
-            .from('comment_table')
-            .select('*')
-            .order('created_at', { ascending: false });
-
-        if (error) throw error;
-
-        const tableBody = document.getElementById("comments-table-body");
-        if (!tableBody) return;
-
-        if (comments.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No comments available.</td></tr>`;
-            return;
-        }
-
-        tableBody.innerHTML = "";
-
-        comments.forEach((comment, index) => {
-            tableBody.innerHTML += `
-                <tr>
-                    <td>${index + 1}</td>
-                    <td><strong>${comment.user_name || 'Anonymous'}</strong></td>
-                    <td>${comment.comment_text || comment.text || 'No comment text'}</td>
-                    <td>Post #${comment.post_id || ''}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-danger px-3"
-                         onclick="deleteComment('${comment.id}')">
-                            <i class="bi bi-trash"></i> Delete
-                        </button>
-                       <button type="button" class="btn btn-sm btn-outline-info edit-post-btn px-3 me-1" onclick="updatecommentData()"><i class="bi bi-pencil-square me-1"></i> Edit</button> 
-                    </td>
-                </tr>
-            `;
-        });
-    } catch (err) {
-        console.error("Error loading comments:", err);
-    }
-}
-function openEditMode(id, title, description) {
-    document.getElementById('edit-post-id').value = id;
-    document.getElementById('edit-post-title').value = title;
-    document.getElementById('edit-post-desc').value = description;
-
-    // Bootstrap modal show karne ke liye
-    const editModal = new bootstrap.Modal(document.getElementById('editPostModal'));
-    editModal.show();
-}
-async function updatePostData() {
-    const postId = document.getElementById('edit-post-id').value;
-    const updatedTitle = document.getElementById('edit-post-title').value;
-    const updatedDesc = document.getElementById('edit-post-desc').value;
-
-    if (!updatedTitle.trim() || !updatedDesc.trim()) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Fields Empty',
-            text: 'Title and Description cannot be empty!',
-            background: '#15222e',
-            color: '#f3f4f6'
-        });
-        return;
-    }
-
-    try {
-        const { error } = await supabase
-            .from('post_app_table')
-            .update({
-                title: updatedTitle,
-                description: updatedDesc
-            })
-            .eq('id', postId);
-
-        if (error) throw error;
-
-        // Modal close karne ke liye
-        const modalEl = document.getElementById('editPostModal');
-        const modalInstance = bootstrap.Modal.getInstance(modalEl);
-        if (modalInstance) {
-            modalInstance.hide();
-        }
-
-        // Success Alert
-        Swal.fire({
-            title: 'Updated!',
-            text: 'Post has been updated successfully.',
-            icon: 'success',
-            iconColor: '#10b981',
-            background: '#15222e',
-            color: '#f3f4f6',
-            timer: 1500,
-            showConfirmButton: false
-        });
-
-        // UI refresh
-        await loadAllPost();
-
-    } catch (err) {
-        Swal.fire({
-            title: 'Error!',
-            text: err.message,
-            icon: 'error',
-            background: '#15222e',
-            color: '#f3f4f6'
-        });
-        console.error("Update error:", err);
     }
 }
 async function deletePost(postId) {
@@ -441,60 +325,6 @@ async function deletePost(postId) {
         }
     }
 }
-// 5. Delete Comment
-async function deleteComment(commentId) {
-    const result = await Swal.fire({
-        title: 'Are you sure?',
-        text: "This comment will be permanently deleted!",
-        icon: 'warning',
-        iconColor: '#f59e0b',
-        showCancelButton: true,
-        confirmButtonColor: '#0d9488',
-        cancelButtonColor: '#e11d48',
-        confirmButtonText: '<i class="bi bi-trash"></i> Yes, delete it!',
-        cancelButtonText: 'Cancel',
-        background: '#15222e',
-        color: '#f3f4f6',
-        customClass: { popup: 'rounded-4 border border-secondary shadow-lg' }
-    });
-
-    if (result.isConfirmed) {
-        try {
-            const { error } = await supabase
-                .from('comment_table')
-                .delete()
-                .eq('id', commentId);
-
-            if (error) throw error;
-
-            Swal.fire({
-                title: 'Deleted!',
-                text: 'Comment has been removed.',
-                icon: 'success',
-                iconColor: '#10b981',
-                background: '#15222e',
-                color: '#f3f4f6',
-                timer: 1500,
-                showConfirmButton: false,
-                customClass: { popup: 'rounded-4 border border-secondary' }
-            });
-
-            await loadAllComments();
-            await fetchStats();
-
-        } catch (err) {
-            Swal.fire({
-                title: 'Error!',
-                text: err.message,
-                icon: 'error',
-                background: '#15222e',
-                color: '#f3f4f6'
-            });
-        }
-    }
-}
-
-// 🚀 clean and safe global tab-switching logic
 function showSection(sectionId) {
     document.querySelectorAll('.admin-section').forEach(section => {
         section.classList.add('d-none');
@@ -606,9 +436,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-/// ==========================================
-// LOAD ALL EVENTS (BUG FIXED)
-// ==========================================
 async function loadAllEvents() {
     const tableBody = document.getElementById("events-table-body");
     if (!tableBody) return;
@@ -689,64 +516,58 @@ async function loadAllEvents() {
 }
 async function deleteEvent(eventId) {
     const result = await Swal.fire({
-        title: "Are you sure?",
-        text: "This event will be permanently deleted!",
-        icon: "warning",
-        iconColor: "#f59e0b",
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        iconColor: '#f43f5e',
         showCancelButton: true,
-        confirmButtonColor: "#0d9488",
-        cancelButtonColor: "#e11d48",
-        confirmButtonText: '<i class="bi bi-trash"></i> Yes, delete it!',
-        cancelButtonText: "Cancel",
-        background: "#15222e",
-        color: "#f3f4f6"
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel',
+        reverseButtons: true
     });
 
     if (!result.isConfirmed) return;
 
     try {
-        // Delete related participants first (Optional safety catch)
-        const { error: participantError } = await supabase
-            .from("event_participants")
-            .delete()
-            .eq("event_id", eventId);
+        const numericId = Number(eventId);
 
-        if (participantError && participantError.code !== 'PGRST116') {
-            console.warn("Participant deletion warning:", participantError.message);
+        // 1. Delete from event_participants
+        try {
+            await supabase
+                .from("event_participants")
+                .delete()
+                .eq("event_id", numericId);
+        } catch (pErr) {
+            console.warn("Participant delete skipped:", pErr);
         }
 
-        // Delete Main Event
+        // 2. Delete from main events table
         const { error } = await supabase
             .from("events")
             .delete()
-            .eq("id", eventId);
+            .eq("id", numericId);
 
         if (error) throw error;
 
-        await Swal.fire({
-            title: "Deleted!",
-            text: "Event has been removed.",
-            icon: "success",
-            timer: 1500,
-            showConfirmButton: false,
-            background: "#15222e",
-            color: "#f3f4f6"
+        // Success Alert with Teal Accent
+        Swal.fire({
+            icon: 'success',
+            iconColor: '#0d9488',
+            title: 'Deleted!',
+            text: 'Event has been deleted successfully.',
+            timer: 2000,
+            showConfirmButton: false
         });
 
-        await loadAllEvents();
-
-        if (typeof loadStats === "function") {
-            await loadStats();
-        }
+        loadAllEvents();
 
     } catch (err) {
-        console.error("Delete event error:", err);
+        console.error("Error deleting event:", err);
         Swal.fire({
-            title: "Error!",
-            text: err.message || "Unable to delete event.",
-            icon: "error",
-            background: "#15222e",
-            color: "#f3f4f6"
+            icon: 'error',
+            iconColor: '#e11d48',
+            title: 'Failed!',
+            text: err.message || 'Database error occurred.'
         });
     }
 }
@@ -757,12 +578,8 @@ window.deleteEvent = deleteEvent;
 window.logoutAdmin = logoutAdmin;
 window.showSection = showSection;
 window.deletePost = deletePost;
-window.deleteComment = deleteComment;
 window.loadStats = loadStats;
 window.loadAllPost = loadAllPost;
-window.loadAllComments = loadAllComments;
-window.updatePostData = updatePostData
-window.openEditMode = openEditMode
 window.loadAllEvents =loadAllEvents
 document.addEventListener("DOMContentLoaded", () => {
     // 1. FOOLPROOF POINTER MOVEMENT
