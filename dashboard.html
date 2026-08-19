@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>create post</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="CSS/style.css">
+</head>
+
+<body>
+  <div id="pointer"></div>
+
+   <nav class="navbar navbar-expand-lg custom-navbar ">
+    <div class="container-fluid">
+
+        <!-- Brand Logo -->
+        <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+            <div class="logo-icon-box">
+                <span class="logo-letter">C</span>
+            </div>
+            <span class="brand-text">CampusConnect</span>
+        </a>
+
+        <!-- Mobile Toggler -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+            data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+            aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Nav Links -->
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-lg-2">
+                <li class="nav-item">
+                    <a class="nav-link active" href="dashboard.html">Create Post</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" aria-current="page" href="event.html">Create Event</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="study-partners.html">Find Study Partner</a>
+                </li>
+            </ul>
+
+            <!-- Controls -->
+            <div class="d-flex align-items-center gap-3 my-2 my-lg-0 ms-auto">
+
+                <!-- Admin Panel Button -->
+                <a href="adminpanel.html" id="admin-panel-btn" class="btn btn-sm btn-info d-none me-1">
+                    <i class="bi bi-shield-lock-fill"></i> Admin Panel
+                </a>
+
+                <!-- 🔔 NOTIFICATION DROPDOWN (NEW) -->
+                <div class="dropdown">
+                    <button class="btn btn-link text-white position-relative p-0 border-0" type="button" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-bell-fill fs-5"></i>
+                        <span id="notifCount" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none; font-size: 0.65rem;">
+                            0
+                        </span>
+                    </button>
+
+                    <ul class="dropdown-menu dropdown-menu-end shadow mt-2" aria-labelledby="notifDropdown" id="notificationsList" style="width: 300px; max-height: 380px; overflow-y: auto;">
+                        <li class="dropdown-item text-muted text-center py-2">No new notifications</li>
+                    </ul>
+                </div>
+
+                <!-- Dynamic Theme Switch -->
+                <div class="theme-switch-wrapper">
+                    <input type="checkbox" id="theme-toggle" class="theme-toggle-checkbox">
+                    <label for="theme-toggle" class="theme-switch-label">
+                        <i class="bi bi-sun-fill sun-icon"></i>
+                        <i class="bi bi-moon-stars-fill moon-icon"></i>
+                        <span class="ball"></span>
+                    </label>
+                </div>
+
+                <!-- Profile Dropdown -->
+                <div class="profile-dropdown" id="logoutBtn">
+            <div class="avatar-circle" onclick="toggleProfileMenu()">
+              <span id="userInitial">U</span>
+            </div>
+
+            <div class="dropdown-popup" id="profilePopup">
+              <p class="user-email-text" id="dropdownEmail">user@mail.com</p>
+              <hr class="dropdown-divider">
+              <button class="dropdown-logout-btn" onclick="logout()">
+                <i class="bi bi-box-arrow-right me-2"></i> Logout
+              </button>
+            </div>
+          </div>
+
+            </div>
+        </div>
+
+    </div>
+</nav>
+  <div class="container ptCont mt-5 my-4 " id="postContainer">
+    <div class="row">
+      <div class="col-sm-12 col-md-6 col-lg-4">
+        <div class="card postcont  p-3 m-2">
+          <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Title</label>
+            <input type="text" class="form-control" id="title" aria-describedby="emailHelp"
+              placeholder="add title name " />
+          </div>
+          <div class="mb-3">
+            <label for="exampleFormControlTextarea1" class="form-label">Description</label>
+            <textarea class="form-control" id="description" rows="3" placeholder="add a post description"></textarea>
+          </div>
+          <div class="mb-3 d-flex images justify-content-around">
+            <img class="bgImg" onclick="addImg('images/1.webp')" src="images/1.webp" alt="">
+            <img class="bgImg" onclick="addImg('images/4.jpg')" src="images/4.jpg" alt="">
+            <img class="bgImg" onclick="addImg('images/image 1.jpg')" src="images/image 1.jpg" alt="">
+            <img class="bgImg" onclick="addImg('images/image 2.webp')" src="images/image 2.webp" alt="">
+            <label class="btn btn-primary userimg" for="imgInput">
+              <i class="bi bi-plus-lg me-1"></i>
+            </label>
+            <input type="file" class="d-none" id="imgInput" accept="image/*">
+            <!-- <img id="previewImg" class="mt-3" style="max-width: 100%; height: auto; display: none;" alt="Image Preview" > -->
+          </div>
+          <div class="text-center mt-3">
+            <img id="previewImg" class="img-thumbnail d-none"
+              style="max-width:100%; max-height:150px; border-radius:10px;" alt="Preview">
+          </div>
+
+          <label class="form-label ">Text Color</label>
+          <div class="color-div d-flex flex-wrap justify-content-around">
+            <div class="colorbox" style="background-color: #8d3e6d; width: 45px; height: 45px; border-radius: 12%;"
+              onclick="applycolor(this)"></div>
+            <div class="colorbox" style="background-color: #92534b; width: 45px; height: 45px; border-radius: 12%;"
+              onclick="applycolor(this)"></div>
+            <div class="colorbox" style="background-color: #16484e; width: 45px; height: 45px; border-radius: 12%;"
+              onclick="applycolor(this)"></div>
+            <div class="colorbox" style="background-color: #6d6735; width: 45px; height: 45px; border-radius: 12%;"
+              onclick="applycolor(this)"></div>
+            <div class="colorbox" style="background-color: #052721; width: 45px; height: 45px; border-radius: 12%;"
+              onclick="applycolor(this)"></div>
+          </div>
+          <button id="postBtn" onclick="post()" type="submit" class="btn btn-primary ms-auto postBtn w-100 mt-3">
+            Post
+          </button>
+
+        </div>
+      </div>
+      <div class="col-sm-12 col-md-6 col-lg-8">
+        <div class="search-box m-2">
+  <!-- 1. Live Search: Jab user type karega toh 'oninput' se search chalega -->
+  <input 
+    class="form-control" 
+    type="search" 
+    id="searchInput" 
+    placeholder="Search posts..." 
+    oninput="searchPosts()" 
+  />
+  <button class="search-btn" onclick="searchPosts()">
+    <i class="bi bi-search"></i>
+  </button>
+</div>
+        <div id="posts" class="posts m-2"></div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment-with-locales.min.js"></script> -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <!-- GSAP ScrollTrigger Plugin -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="JS/app.js" type="module"></script>
+</body>
+
+</html>

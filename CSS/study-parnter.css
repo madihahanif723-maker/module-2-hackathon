@@ -1,0 +1,403 @@
+/* ==========================================
+   1. ROOT VARIABLES & THEME CONFIGURATION
+   ========================================== */
+:root {
+  --bg-primary: #080f1f;
+  --bg-surface: #0f172a;
+  --bg-card: #1e293b;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --accent-emerald: #00dfa2;
+  --accent-emerald-hover: #00c78e;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="light"] {
+  --bg-primary: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-card: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --accent-emerald: #00dfa2;
+  --accent-emerald-hover: #00b884;
+  --border-color: rgba(0, 0, 0, 0.08);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* ==========================================
+   2. BASE STYLES & LAYOUT
+   ========================================== */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  transition: var(--transition-smooth);
+  min-height: 100vh;
+}
+
+/* Custom Pointer Glow */
+#pointer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  background-color: var(--accent-emerald);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Utility Colors */
+.text-emerald {
+  color: var(--accent-emerald) !important;
+}
+
+.bg-surface {
+  background-color: var(--bg-surface) !important;
+}
+
+/* ==========================================
+   3. CARDS & SECTIONS
+   ========================================== */
+.partner-card,
+.filter-card,
+.profile-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  transition: var(--transition-smooth);
+  box-shadow: var(--shadow-sm);
+}
+
+.partner-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(0, 223, 162, 0.3);
+}
+
+.partner-avatar {
+  border: 2px solid var(--accent-emerald);
+}
+
+/* ==========================================
+   4. BADGES & BUTTONS
+   ========================================== */
+.badge-skill {
+  background-color: rgba(0, 223, 162, 0.12);
+  color: var(--accent-emerald);
+  border: 1px solid rgba(0, 223, 162, 0.25);
+  font-weight: 500;
+}
+
+.badge-level {
+  background-color: rgba(148, 163, 184, 0.15);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.btn-emerald {
+  background-color: var(--accent-emerald);
+  color: #080f1f;
+  border: none;
+  border-radius: 8px;
+  transition: var(--transition-smooth);
+}
+
+.btn-emerald:hover {
+  background-color: var(--accent-emerald-hover);
+  color: #080f1f;
+  transform: translateY(-1px);
+}
+
+/* ==========================================
+   5. PROFILE POPUP & DROPDOWN
+   ========================================== */
+#profilePopup {
+  position: absolute;
+  right: 1rem;
+  top: 100%;
+  width: 280px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: var(--transition-smooth);
+  z-index: 1050;
+}
+
+#profilePopup.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* ==========================================
+   6. FORM INPUTS & SEARCH
+   ========================================== */
+.form-control,
+.form-select {
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.form-control:focus,
+.form-select:focus {
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  border-color: var(--accent-emerald);
+  box-shadow: 0 0 0 0.25rem rgba(0, 223, 162, 0.2);
+}
+/* ==========================================
+   1. COLOR VARIABLES & THEMING FIXES
+   ========================================== */
+:root {
+  --bg-primary: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-card: #ffffff;
+  --text-primary: #0f172a;
+  --text-muted: #64748b;
+  --accent-emerald: #00dfa2;
+  --accent-emerald-hover: #00c78e;
+  --border-color: #e2e8f0;
+  --input-bg: #ffffff;
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="dark"] {
+  --bg-primary: #080f1f;
+  --bg-surface: #0f172a;
+  --bg-card: #131f37;
+  --text-primary: #f8fafc;
+  --text-muted: #94a3b8;
+  --accent-emerald: #00dfa2;
+  --accent-emerald-hover: #00c78e;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --input-bg: #0b1329;
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.45);
+}
+
+/* ==========================================
+   2. GLOBAL TYPOGRAPHY & BODY FIX
+   ========================================== */
+body {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  transition: var(--transition-smooth);
+}
+
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+  color: var(--text-primary) !important;
+}
+
+.text-muted {
+  color: var(--text-muted) !important;
+}
+
+/* Custom Pointer Glow */
+#pointer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  background-color: var(--accent-emerald);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Utility Colors */
+.text-emerald {
+  color: var(--accent-emerald) !important;
+}
+
+/* ==========================================
+   3. CARDS & CONTRAST FIXES
+   ========================================== */
+.partner-card,
+.filter-card,
+.profile-card {
+  background-color: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 14px;
+  transition: var(--transition-smooth);
+  box-shadow: var(--shadow-sm);
+}
+
+.partner-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--accent-emerald) !important;
+}
+
+.partner-avatar {
+  border: 2px solid var(--accent-emerald);
+}
+
+/* Partner Card Text Specific Fixes */
+.partner-card h5 {
+  color: var(--text-primary) !important;
+}
+
+.partner-card p, 
+.partner-card small {
+  color: var(--text-muted) !important;
+}
+
+/* ==========================================
+   4. BADGES & BUTTONS
+   ========================================== */
+.badge-skill {
+  background-color: rgba(0, 223, 162, 0.15) !important;
+  color: var(--accent-emerald) !important;
+  border: 1px solid rgba(0, 223, 162, 0.3) !important;
+  font-weight: 500;
+}
+
+.badge-level {
+  background-color: rgba(148, 163, 184, 0.15) !important;
+  color: var(--text-muted) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.btn-emerald {
+  background-color: var(--accent-emerald) !important;
+  color: #080f1f !important;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  transition: var(--transition-smooth);
+}
+
+.btn-emerald:hover {
+  background-color: var(--accent-emerald-hover) !important;
+  color: #080f1f !important;
+  transform: translateY(-1px);
+}
+
+/* ==========================================
+   5. INPUT FIELDS & SELECT DROPDOWNS
+   ========================================== */
+.form-control,
+.form-select {
+  background-color: var(--input-bg) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 8px;
+}
+
+.form-control::placeholder {
+  color: var(--text-muted) !important;
+  opacity: 0.7;
+}
+
+.form-control:focus,
+.form-select:focus {
+  background-color: var(--input-bg) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--accent-emerald) !important;
+  box-shadow: 0 0 0 0.25rem rgba(0, 223, 162, 0.2) !important;
+}
+
+/* ==========================================
+   6. PROFILE POPUP
+   ========================================== */
+#profilePopup {
+  position: absolute;
+  right: 1rem;
+  top: 100%;
+  width: 280px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: var(--transition-smooth);
+  z-index: 1050;
+}
+
+#profilePopup.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+/* ==========================================
+   HEADINGS CONTRAST FIX
+   ========================================== */
+
+/* Main Section Heading */
+.col-lg-8 h2,
+.col-lg-8 .h2,
+main h2,
+h2 {
+  color: #0f172a !important; /* Dark Navy Color for Light Mode */
+  font-weight: 700 !important;
+}
+
+/* Dark Mode Override */
+[data-theme="dark"] .col-lg-8 h2,
+[data-theme="dark"] .col-lg-8 .h2,
+[data-theme="dark"] main h2,
+[data-theme="dark"] h2 {
+  color: #f8fafc !important; /* Light Color for Dark Mode */
+}
+
+/* Subtitle / Paragraph under Heading */
+.col-lg-8 p,
+main p.text-muted {
+  color: #475569 !important;
+}
+
+[data-theme="dark"] .col-lg-8 p,
+[data-theme="dark"] main p.text-muted {
+  color: #94a3b8 !important;
+}
+/* Light Mode (Default) Heading Color */
+.heading {
+  color: #0f172a !important; /* Dark Slate Navy for Light Mode */
+  transition: color 0.3s ease;
+}
+
+/* Dark Mode Heading Color */
+[data-theme="dark"] .heading {
+  color: #ffffff !important; /* White for Dark Mode */
+}
+/* SweetAlert Theme Variables Integration */
+:root {
+  --swal-bg: #ffffff;
+  --swal-color: #1e293b;
+}
+
+[data-theme="dark"] {
+  --swal-bg: #0d1527;      /* Dark Navy background */
+  --swal-color: #f8fafc;   /* Light text color */
+}
+
+/* Custom SweetAlert Styling Override */
+.custom-swal-popup {
+  background-color: var(--swal-bg) !important;
+  color: var(--swal-color) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+}
+
+.custom-swal-popup .swal2-title,
+.custom-swal-popup .swal2-html-container {
+  color: var(--swal-color) !important;
+}

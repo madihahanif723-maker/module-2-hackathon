@@ -1,0 +1,817 @@
+:root {
+    --bg-color: #0f172a;
+    --card-bg: #1e293b;
+    --text-color: #f8fafc;
+    --border-color: rgba(255, 255, 255, 0.1);
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-x: hidden;
+}
+
+.sidebar {
+    background-color: var(--card-bg);
+    border-right: 1px solid var(--border-color);
+    min-height: 100vh;
+}
+
+.card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+.table {
+    color: var(--text-color);
+}
+
+.table th {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #14b8a6;
+    border-color: var(--border-color);
+}
+
+.table td {
+    border-color: var(--border-color);
+    background-color: transparent !important;
+    color: var(--text-color) !important;
+}
+
+.nav-link {
+    color: #94a3b8;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.nav-link.active,
+.nav-link:hover {
+    color: #14b8a6 !important;
+    background-color: rgba(20, 184, 166, 0.1);
+    border-radius: 5px;
+}
+
+/* Custom Scrollbar for modern look */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #0d9488;
+}
+
+/* Sidebar Modifications */
+.sidebar {
+    background: #0f172a !important;
+    /* Darker navy background */
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.sidebar .nav-link {
+    color: #94a3b8 !important;
+    font-weight: 500;
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin: 5px 15px;
+    transition: all 0.3s ease;
+}
+
+.sidebar .nav-link:hover {
+    background: rgba(13, 148, 136, 0.1) !important;
+    /* Soft Teal Glow */
+    color: #0d9488 !important;
+}
+
+.sidebar .nav-link.active {
+    background: linear-gradient(135deg, #0d9488, #0f766e) !important;
+    /* Premium Teal Gradient */
+    color: #ffffff !important;
+    box-shadow: 0 4px 15px rgba(13, 148, 136, 0.3);
+}
+
+/* Dashboard Stats Cards */
+.card {
+    background: #15222e !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: 16px !important;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 15px rgba(13, 148, 136, 0.1) !important;
+    border-color: rgba(13, 148, 136, 0.3) !important;
+}
+
+/* Gorgeous Tables Design */
+.table-responsive {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: #15222e;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.table {
+    margin-bottom: 0 !important;
+    background-color: transparent !important;
+    color: #e2e8f0 !important;
+}
+
+/* Header style for table */
+.table thead th {
+    background-color: #0f172a !important;
+    color: #0d9488 !important;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    padding: 16px;
+    border-bottom: 2px solid rgba(13, 148, 136, 0.2) !important;
+}
+
+/* Rows and Cells */
+.table tbody td {
+    padding: 16px !important;
+    vertical-align: middle !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
+}
+
+.table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+/* Action Delete Button */
+.btn-danger {
+    background-color: rgba(225, 29, 72, 0.1) !important;
+    /* Translucent Rose background */
+    color: #f43f5e !important;
+    border: 1px solid rgba(225, 29, 72, 0.2) !important;
+    padding: 8px 16px !important;
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-danger:hover {
+    background-color: #e11d48 !important;
+    /* Solid Rose Red on hover */
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
+    transform: scale(1.03);
+}
+
+/* Text Formatting inside Table */
+.text-truncate {
+    max-width: 250px;
+    color: #94a3b8;
+}
+
+.text-muted {
+    color: #64748b !important;
+}
+.admin-section {
+    transition: opacity 0.3s ease-in-out;
+}
+/* ================= MOBILE RESPONSIVENESS ================= */
+
+/* Tables ko responsive scroll dene ke liye */
+.table-responsive {
+    width: 100%;
+    margin-bottom: 1rem;
+    overflow-y: hidden;
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+    border: 1px solid #2d3748;
+    border-radius: 8px;
+}
+
+/* Mobile Screens (992px se choti screens) */
+@media (max-width: 991.98px) {
+    /* Sidebar ko default hide aur slide-in transition dena */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: -260px; /* Hidden by default */
+        height: 100vh;
+        width: 260px;
+        z-index: 1050;
+        transition: left 0.3s ease-in-out;
+        box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+    }
+
+    /* Sidebar jab active/open ho */
+    .sidebar.show {
+        left: 0;
+    }
+
+    /* Main content margin reset */
+    .main-content {
+        margin-left: 0 !important;
+        padding-top: 60px !important; /* Top bar ke liye space */
+    }
+
+    /* Mobile Header/Navbar toggler ke liye */
+    .mobile-header {
+        display: flex !important;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background-color: #0f172a;
+        border-bottom: 1px solid #1e293b;
+        z-index: 1040;
+        align-items: center;
+        padding: 0 15px;
+    }
+
+    /* Sidebar overlay jab mobile par menu khule */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1045;
+    }
+    
+    .sidebar-overlay.show {
+        display: block;
+    }
+}
+#pointer {
+  width: 18px;          /* Size chota karne ke liye (e.g. 14px ya 16px) */
+  height: 18px;
+  background-color: #10b981;
+  border-radius: 50%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 99999;
+  filter: blur(4px);    /* Soft blur effect */
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.8);
+}
+/* Normal Pointer State */
+#pointer {
+  width: 18px;
+  height: 18px;
+  background-color: #10b981;
+  box-shadow: 0 0 15px #10b981;
+  transition: transform 0.2s ease;
+}
+
+/* Jab kisi clickable item par hover ho */
+body:has(button:hover, a:hover, input:hover) #pointer {
+  transform: scale(1.8);
+  opacity: 0.8;
+}
+
+/* Desktop layout ke liye mobile header hide rahega */
+@media (min-width: 992px) {
+    .mobile-header {
+        display: none !important;
+    }
+    .sidebar-overlay {
+        display: none !important;
+    }
+}
+/* Buttons wrap handle karne ke liye table updates */
+.table td .d-flex {
+    flex-wrap: nowrap; /* Taki buttons upar neeche na hon */
+}
+
+@media (max-width: 576px) {
+    .table td .d-flex {
+        flex-direction: column; /* Mobile screen par buttons stack ho jayenge aur easy access denge */
+        gap: 5px !important;
+    }
+}
+/* ==========================================
+   GLOBAL THEME VARIABLES & BASE STYLES
+   ========================================== */
+:root {
+    --bg-color: #0f172a;
+    --card-bg: #15222e;
+    --text-color: #f8fafc;
+    --border-color: rgba(255, 255, 255, 0.05);
+    --teal-primary: #0d9488;
+    --teal-hover: #14b8a6;
+    --rose-danger: #e11d48;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--teal-primary);
+}
+
+/* ==========================================
+   SIDEBAR & NAVIGATION
+   ========================================== */
+.sidebar {
+    background: #0f172a !important;
+    border-right: 1px solid var(--border-color);
+    min-height: 100vh;
+}
+
+.sidebar .nav-link {
+    color: #94a3b8 !important;
+    font-weight: 500;
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin: 5px 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sidebar .nav-link:hover {
+    background: rgba(13, 148, 136, 0.1) !important;
+    color: var(--teal-primary) !important;
+}
+
+.sidebar .nav-link.active {
+    background: linear-gradient(135deg, #0d9488, #0f766e) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 15px rgba(13, 148, 136, 0.3);
+}
+
+/* ==========================================
+   CARDS & CONTAINERS
+   ========================================== */
+.card {
+    background: var(--card-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 16px !important;
+    color: var(--text-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 15px rgba(13, 148, 136, 0.1) !important;
+    border-color: rgba(13, 148, 136, 0.3) !important;
+}
+
+.admin-section {
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* ==========================================
+   TABLES DESIGN
+   ========================================== */
+.table-responsive {
+    width: 100%;
+    margin-bottom: 1rem;
+    overflow-y: hidden;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+}
+
+.table {
+    margin-bottom: 0 !important;
+    background-color: transparent !important;
+    color: #e2e8f0 !important;
+}
+
+.table thead th {
+    background-color: #0f172a !important;
+    color: var(--teal-primary) !important;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    padding: 16px;
+    border-bottom: 2px solid rgba(13, 148, 136, 0.2) !important;
+}
+
+.table tbody td {
+    padding: 16px !important;
+    vertical-align: middle !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
+    background-color: transparent !important;
+    color: var(--text-color) !important;
+}
+
+.table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+.table td .d-flex {
+    flex-wrap: nowrap;
+}
+
+/* Utility & Actions */
+.btn-danger {
+    background-color: rgba(225, 29, 72, 0.1) !important;
+    color: #f43f5e !important;
+    border: 1px solid rgba(225, 29, 72, 0.2) !important;
+    padding: 8px 16px !important;
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-danger:hover {
+    background-color: var(--rose-danger) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
+    transform: scale(1.03);
+}
+
+.text-truncate {
+    max-width: 250px;
+    color: #94a3b8;
+}
+
+.text-muted {
+    color: #64748b !important;
+}
+
+/* ==========================================
+   GLOWING POINTER CURSOR
+   ========================================== */
+#pointer {
+    width: 18px;
+    height: 18px;
+    background-color: #10b981;
+    border-radius: 50%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 99999;
+    filter: blur(4px);
+    box-shadow: 0 0 15px #10b981;
+    transition: transform 0.2s ease;
+}
+
+body:has(button:hover, a:hover, input:hover, .nav-link:hover) #pointer {
+    transform: scale(1.8);
+    opacity: 0.8;
+}
+
+/* ==========================================
+   MOBILE & DESKTOP BREAKPOINTS
+   ========================================== */
+@media (min-width: 992px) {
+    .mobile-header,
+    .sidebar-overlay {
+        display: none !important;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: -260px;
+        height: 100vh;
+        width: 260px;
+        z-index: 1050;
+        transition: left 0.3s ease-in-out;
+        box-shadow: 5px 0 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .sidebar.show {
+        left: 0;
+    }
+
+    .main-content {
+        margin-left: 0 !important;
+        padding-top: 60px !important;
+    }
+
+    .mobile-header {
+        display: flex !important;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background-color: #0f172a;
+        border-bottom: 1px solid #1e293b;
+        z-index: 1040;
+        align-items: center;
+        padding: 0 15px;
+    }
+
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1045;
+    }
+    
+    .sidebar-overlay.show {
+        display: block;
+    }
+}
+
+@media (max-width: 576px) {
+    .table td .d-flex {
+        flex-direction: column;
+        gap: 5px !important;
+    }
+}
+/* ==========================================
+   GLOBAL THEME VARIABLES & BASE STYLES
+   ========================================== */
+:root {
+    --bg-color: #0f172a;
+    --card-bg: #15222e;
+    --text-color: #f8fafc;
+    --border-color: rgba(255, 255, 255, 0.05);
+    --teal-primary: #0d9488;
+    --teal-hover: #14b8a6;
+    --rose-danger: #e11d48;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--teal-primary);
+}
+
+/* ==========================================
+   SIDEBAR & NAVIGATION
+   ========================================== */
+.sidebar {
+    background: #0f172a !important;
+    border-right: 1px solid var(--border-color);
+    min-height: 100vh;
+}
+
+.sidebar .nav-link {
+    color: #94a3b8 !important;
+    font-weight: 500;
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin: 5px 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sidebar .nav-link:hover {
+    background: rgba(13, 148, 136, 0.1) !important;
+    color: var(--teal-primary) !important;
+}
+
+.sidebar .nav-link.active {
+    background: linear-gradient(135deg, #0d9488, #0f766e) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 15px rgba(13, 148, 136, 0.3);
+}
+
+/* ==========================================
+   CARDS & CONTAINERS
+   ========================================== */
+.card {
+    background: var(--card-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 16px !important;
+    color: var(--text-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 15px rgba(13, 148, 136, 0.1) !important;
+    border-color: rgba(13, 148, 136, 0.3) !important;
+}
+
+.admin-section {
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* ==========================================
+   TABLES DESIGN
+   ========================================== */
+.table-responsive {
+    width: 100%;
+    margin-bottom: 1rem;
+    overflow-y: hidden;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+}
+
+.table {
+    margin-bottom: 0 !important;
+    background-color: transparent !important;
+    color: #e2e8f0 !important;
+}
+
+.table thead th {
+    background-color: #0f172a !important;
+    color: var(--teal-primary) !important;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    padding: 16px;
+    border-bottom: 2px solid rgba(13, 148, 136, 0.2) !important;
+}
+
+.table tbody td {
+    padding: 16px !important;
+    vertical-align: middle !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
+    background-color: transparent !important;
+    color: var(--text-color) !important;
+}
+
+.table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+.table td .d-flex {
+    flex-wrap: nowrap;
+}
+
+/* Utility & Actions */
+.btn-danger {
+    background-color: rgba(225, 29, 72, 0.1) !important;
+    color: #f43f5e !important;
+    border: 1px solid rgba(225, 29, 72, 0.2) !important;
+    padding: 8px 16px !important;
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-danger:hover {
+    background-color: var(--rose-danger) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
+    transform: scale(1.03);
+}
+
+.text-truncate {
+    max-width: 250px;
+    color: #94a3b8;
+}
+
+.text-muted {
+    color: #64748b !important;
+}
+
+/* ==========================================
+   GLOWING POINTER CURSOR
+   ========================================== */
+#pointer {
+    width: 18px;
+    height: 18px;
+    background-color: #10b981;
+    border-radius: 50%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 99999;
+    filter: blur(4px);
+    box-shadow: 0 0 15px #10b981;
+    transition: transform 0.2s ease;
+}
+
+body:has(button:hover, a:hover, input:hover, .nav-link:hover) #pointer {
+    transform: scale(1.8);
+    opacity: 0.8;
+}
+
+/* ==========================================
+   MOBILE & DESKTOP BREAKPOINTS
+   ========================================== */
+@media (min-width: 992px) {
+    .mobile-header,
+    .sidebar-overlay {
+        display: none !important;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: -260px;
+        height: 100vh;
+        width: 260px;
+        z-index: 1050;
+        transition: left 0.3s ease-in-out;
+        box-shadow: 5px 0 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .sidebar.show {
+        left: 0;
+    }
+
+    .main-content {
+        margin-left: 0 !important;
+        padding-top: 60px !important;
+    }
+
+    .mobile-header {
+        display: flex !important;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background-color: #0f172a;
+        border-bottom: 1px solid #1e293b;
+        z-index: 1040;
+        align-items: center;
+        padding: 0 15px;
+    }
+
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1045;
+    }
+    
+    .sidebar-overlay.show {
+        display: block;
+    }
+}
+
+@media (max-width: 576px) {
+    .table td .d-flex {
+        flex-direction: column;
+        gap: 5px !important;
+    }
+}

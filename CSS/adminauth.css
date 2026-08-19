@@ -1,0 +1,189 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+    --bg-dark: #0f172a;
+    --card-bg: #1e293b;
+    --input-bg: #0f172a;
+    --input-border: #334155;
+    --accent-teal: #10b981;
+    --accent-teal-glow: rgba(16, 185, 129, 0.25);
+    --text-primary: #f8fafc;
+    --text-muted: #94a3b8;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--bg-dark);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 20px 15px;
+    color: var(--text-primary);
+}
+
+/* Card Container (Works for both .login-card & .signup-card) */
+.login-card,
+.signup-card {
+    background: var(--card-bg);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 28px 24px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+    text-align: center;
+}
+
+/* Header Icon */
+.card-header-icon {
+    font-size: 30px;
+    color: var(--accent-teal);
+    background: rgba(16, 185, 129, 0.12);
+    padding: 10px 14px;
+    border-radius: 12px;
+    display: inline-block;
+    box-shadow: 0 4px 12px var(--accent-teal-glow);
+}
+
+/* Headings & Subtitles */
+.login-title,
+.signup-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-top: 10px;
+    margin-bottom: 2px;
+}
+
+.login-subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+}
+
+/* Form Group & Label Alignment */
+.form-group {
+    text-align: left;
+    margin-bottom: 14px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #cbd5e1; /* Clean high-contrast white/grey */
+    margin-bottom: 5px;
+}
+
+/* Form Inputs */
+.form-control {
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 10px;
+    padding: 9px 12px;
+    font-size: 13.5px;
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+}
+
+.form-control::placeholder {
+    color: #64748b;
+}
+
+.form-control:focus {
+    background-color: var(--input-bg);
+    border-color: var(--accent-teal);
+    color: #ffffff;
+    box-shadow: 0 0 0 3px var(--accent-teal-glow);
+}
+
+/* Primary Action Buttons */
+.login-btn,
+.signup-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 6px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.25s ease;
+    box-shadow: 0 6px 16px var(--accent-teal-glow);
+    cursor: pointer;
+}
+
+.login-btn:hover,
+.signup-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35);
+    color: #ffffff;
+}
+
+.login-btn:active,
+.signup-btn:active {
+    transform: translateY(0);
+}
+
+/* Register / Return Link */
+/* Links Styling (Bright & Clear Visible) */
+.register-link {
+    color: #10b981 !important; /* Soft Bright Cyan/Teal Blue */
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    margin-top: 6px;
+}
+/* Input Wrapper Relative Layout */
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* Icon Alignment Inside Input */
+.input-wrapper .input-icon {
+    position: absolute;
+    left: 12px;
+    color: #64748b;
+    font-size: 15px;
+    pointer-events: none; /* User click input par hi trigger ho */
+    transition: color 0.2s ease;
+}
+
+/* Input Padding Shift for Text Space */
+.input-wrapper .form-control {
+    padding-left: 38px !important;
+}
+
+/* Focus State Effect on Icons */
+.input-wrapper .form-control:focus + .input-icon,
+.input-wrapper:focus-within .input-icon {
+    color: #10b981; /* Focus hone par green/teal accent glow */
+}
+.register-link:hover {
+    color: #10b981 !important; /* Vibrant Emerald Teal on Hover */
+    text-decoration: none;
+    transform: translateX(-2px); /* Subtle shift left on hover */
+}
+/* Subtitle Text Spacing Fix */
+.signup-card p,
+.login-subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    margin-bottom: 20px !important; /* Spacing text aur inputs ke beech */
+    line-height: 1.4;
+}

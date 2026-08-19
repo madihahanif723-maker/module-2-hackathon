@@ -1,0 +1,1016 @@
+/* ==========================
+   GLOBAL & CSS VARIABLES
+========================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    transition: background 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+
+/* Light Mode Variables (Default) */
+:root, [data-theme="light"] {
+    --body-bg: #edf2f7;
+    --navbar-bg: #ffffff;
+    --card-bg: #ffffff;
+    --header-bg: #f8fafc;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --primary-teal: #10b981;
+    --primary-teal-hover: #059669;
+    --primary: #14b8a6;
+    --primary-hover: #0f766e;
+    --border: #e2e8f0;
+}
+
+/* Dark Mode Variables */
+[data-theme="dark"], body.dark-mode, body.dark {
+    --body-bg: #0f172a;
+    --navbar-bg: #1e293b;
+    --card-bg: #1e293b;
+    --header-bg: #111827;
+    --text: #f8fafc;
+    --text-muted: #94a3b8;
+    --primary-teal: #10b981;
+    --primary-teal-hover: #059669;
+    --primary: #14b8a6;
+    --primary-hover: #0d9488;
+    --border: #334155;
+}
+
+body {
+    font-family: "Poppins", sans-serif;
+    min-height: 100vh;
+    background: var(--body-bg) !important;
+    color: var(--text) !important;
+}
+
+/* ==========================
+   SCROLLBAR
+========================== */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #14b8a6;
+    border-radius: 20px;
+}
+
+/* ==========================
+   NAVBAR (FULLY DYNAMIC)
+========================== */
+nav, .navbar, .bg-dark.navbar {
+    background-color: var(--navbar-bg) !important;
+    border-bottom: 1px solid var(--border) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+    padding: 12px 20px !important;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.navbar-brand, 
+.navbar-brand span, 
+.logo-text, 
+nav h1 {
+    color: var(--text) !important;
+    font-size: 24px;
+    font-weight: 700 !important;
+    letter-spacing: -0.5px;
+    filter: none !important;
+    opacity: 1 !important;
+    -webkit-font-smoothing: antialiased;
+}
+
+.nav-link {
+    color: var(--text) !important;
+}
+
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.custom-navbar .nav-link.active {
+    color: var(--primary-teal) !important;
+    background-color: rgba(16, 185, 129, 0.12);
+    font-weight: 600;
+}
+
+/* --- PREMIUM AVATAR PROFILE DROPDOWN --- */
+.profile-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.logo-icon-box {
+    background: linear-gradient(135deg, #10b981, #3b82f6);
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.logo-letter {
+    color: #fff;
+    font-weight: 800;
+    font-size: 20px;
+    font-family: 'Inter', sans-serif;
+}
+
+.brand-text {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -.5px;
+    background: linear-gradient(to right, #14b8a6, #3b82f6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Theme Pill Switch */
+.theme-switch-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 54px;
+    height: 28px;
+}
+
+.theme-toggle-checkbox {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.theme-switch-label {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #334155;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 6px;
+}
+
+.sun-icon { color: #f59e0b; font-size: 14px; }
+.moon-icon { color: #f1f5f9; font-size: 14px; }
+
+.theme-switch-label .ball {
+    position: absolute;
+    height: 22px;
+    width: 22px;
+    left: 3px;
+    bottom: 3px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+}
+
+.theme-toggle-checkbox:checked + .theme-switch-label .ball {
+    transform: translateX(26px);
+}
+
+/* Avatar Circle Base */
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #0ba360 0%, #3cba92 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.avatar-circle:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 15px rgba(11, 163, 96, 0.4);
+}
+
+.avatar-circle span {
+    color: #ffffff !important;
+    font-size: 18px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* Dropdown Popup Panel */
+.dropdown-popup {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 50px;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border);
+    min-width: 200px;
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    z-index: 1100;
+    animation: fadeInDropdown 0.2s ease;
+}
+
+.dropdown-popup.show {
+    display: block;
+}
+
+.user-email-text {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    padding: 0 4px;
+    word-break: break-all;
+}
+
+.dropdown-divider {
+    border-color: var(--border);
+    margin: 8px 0;
+}
+
+.dropdown-logout-btn {
+    width: 100%;
+    background-color: #be123c;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.dropdown-logout-btn:hover {
+    background-color: #9f1239;
+}
+
+@keyframes fadeInDropdown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ==========================
+   LEFT POST FORM / SIDEBAR
+========================== */
+.postcont {
+    background: var(--card-bg) !important;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, .05);
+    position: sticky;
+    top: 35px;
+}
+
+#previewImg {
+    display: block;
+    margin: auto;
+    object-fit: cover;
+}
+
+#previewImg.d-none {
+    display: none !important;
+}
+
+.form-label {
+    color: var(--text);
+    font-weight: 600;
+}
+
+.form-control {
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text) !important;
+}
+
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 .25rem rgba(20, 184, 166, .2);
+    background: transparent;
+}
+
+.form-control::placeholder {
+    color: var(--text-muted) !important;
+    opacity: 0.8 !important;
+}
+
+/* ==========================
+   IMAGE SELECT & COLORS
+========================== */
+.images img {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    object-fit: cover;
+    cursor: pointer;
+    border: 3px solid transparent;
+}
+
+.images img:hover {
+    transform: scale(1.08);
+}
+
+.userimg {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #14b8a6, #0f766e);
+    border-radius: 10px;
+    object-fit: cover;
+    cursor: pointer;
+    border: 3px solid var(--primary) !important;
+    box-shadow: 0 0 15px rgba(20, 184, 166, .5);
+}
+
+.userimg:hover {
+    transform: scale(1.08);
+}
+
+.bgImg.addImg {
+    border: 2px solid #10b981 !important;
+    transform: scale(1.08);
+    transition: all 0.2s ease;
+}
+
+.colorbox {
+    width: 45px;
+    height: 45px;
+    border-radius: 10px;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.colorbox:hover {
+    transform: scale(1.1);
+}
+
+.colorbox.selected {
+    border: 3px solid white;
+    box-shadow: 0 0 0 3px var(--primary);
+}
+
+/* ==========================
+   BUTTONS STYLING
+========================== */
+.postBtn, #postBtn, button#postBtn, .btn-success {
+    width: 100%;
+    border: none !important;
+    padding: 12px;
+    border-radius: 12px;
+    color: white !important;
+    background: linear-gradient(135deg, #0ba360 0%, #3cba92 100%) !important;
+    font-size: 17px;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 15px rgba(11, 163, 96, 0.2) !important;
+    transition: all 0.3s ease !important;
+}
+
+.postBtn:hover, #postBtn:hover, button#postBtn:hover {
+    background: linear-gradient(135deg, #3cba92 0%, #0ba360 100%) !important;
+    box-shadow: 0 6px 20px rgba(11, 163, 96, 0.4) !important;
+    transform: translateY(-2px) !important;
+}
+
+.btn-danger, button[onclick="logout()"] {
+    background-color: #be123c !important;
+    border: 1px solid #e11d48 !important;
+    color: #ffffff !important;
+    font-weight: 500 !important;
+    border-radius: 12px !important;
+    transition: background-color 0.2s ease, transform 0.1s ease !important;
+}
+
+.btn-danger:hover, button[onclick="logout()"]:hover {
+    background-color: #9f1239 !important;
+}
+
+/* ==========================
+   SEARCH BOX
+========================== */
+.search-box {
+    position: relative;
+}
+
+.search-box input {
+    height: 50px;
+    border-radius: 14px;
+    padding-right: 45px;
+}
+
+.search-btn {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    width: 35px;
+    height: 35px;
+    border: none;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+}
+
+/* ==========================
+   POST CARD
+========================== */
+.card {
+    border: 1px solid var(--border) !important;
+    overflow: hidden;
+    border-radius: 18px;
+    background: var(--card-bg) !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, .05);
+    transition: .35s;
+}
+
+.card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, .15);
+}
+
+.card-header {
+    background: var(--header-bg) !important;
+    color: var(--text) !important;
+    font-weight: 600;
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border) !important;
+}
+
+.card-body {
+    position: relative;
+    min-height: 200px;
+    background-size: cover;
+    background-position: center;
+    padding: 20px;
+    overflow: hidden;
+}
+
+.card-body::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, .35);
+}
+
+.card-body > * {
+    position: relative;
+    z-index: 2;
+}
+
+.card-title {
+    color: #fff !important;
+    font-size: 30px;
+    font-weight: 700;
+}
+
+.card-text {
+    color: #f1f5f9 !important;
+    font-size: 17px;
+}
+
+.bi-pencil-square {
+    color: #ffb74d !important;
+    font-size: 1.2rem !important;
+    cursor: pointer;
+}
+
+.bi-trash {
+    color: #ff6b6b !important;
+    font-size: 1.2rem !important;
+    cursor: pointer;
+}
+
+.card-header i, .card-header button {
+    margin-left: 12px !important;
+    transition: transform 0.2s ease !important;
+}
+
+.card-header i:hover {
+    transform: scale(1.2) !important;
+}
+
+/* ==========================
+   THEME TOGGLE SWITCH
+========================== */
+.theme-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+}
+
+.theme-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: var(--header-bg);
+    border: 1px solid var(--border);
+    border-radius: 30px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+}
+
+.slider::before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--primary);
+    border-radius: 50%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1;
+}
+
+.slider .icon {
+    position: absolute;
+    z-index: 2;
+    font-size: 12px;
+    transition: all 0.3s ease;
+}
+
+.slider .sun-icon {
+    left: 8px;
+    color: #f59e0b;
+    opacity: 1;
+}
+
+.slider .moon-icon {
+    right: 8px;
+    color: #38bdf8;
+    opacity: 0;
+}
+
+input:checked + .slider::before {
+    transform: translateX(30px);
+}
+
+input:checked + .slider .sun-icon {
+    opacity: 0;
+}
+
+input:checked + .slider .moon-icon {
+    opacity: 1;
+}
+
+/* ==========================
+   COMMENTS & DROPDOWNS
+========================== */
+.comment-box-item {
+    background-color: var(--header-bg) !important;
+    color: var(--text) !important;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.comment-text-content {
+    color: var(--text) !important;
+}
+
+.comment-dots-btn {
+    color: var(--text-muted) !important;
+}
+
+.comment-input-field {
+    background-color: var(--card-bg) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border) !important;
+}
+
+.comment-input-field::placeholder {
+    color: var(--text-muted) !important;
+}
+
+.custom-comment-dropdown {
+    background-color: var(--card-bg) !important;
+    border: 1px solid var(--border) !important;
+}
+
+.custom-comment-dropdown .dropdown-item {
+    color: var(--text) !important;
+}
+
+.custom-comment-dropdown .dropdown-item:hover {
+    background-color: var(--header-bg) !important;
+}
+
+.no-comment-text {
+    color: var(--text-muted) !important;
+}
+/* Card Body Polish */
+/* Card Body Polish */
+.card-body {
+    position: relative;
+    min-height: 200px;
+    background-size: cover;
+    background-position: center;
+    padding: 25px 25px !important; /* Increased padding for better breathing space */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+}
+
+/* Text Visibility & Contrast Boost */
+.card-title {
+    font-size: 26px !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.3px;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4); /* Makes text pop on any dynamic background */
+}
+
+.card-text {
+    font-size: 16px !important;
+    font-weight: 500 !important;
+    opacity: 0.95;
+    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+}
+/* 1. Main Card aur Comments Wrapper ka overflow crop hone se roko */
+.card, 
+.card-body,
+[id^="comments-list-"] {
+    overflow: visible !important;
+}
+
+/* 2. Dropdown ko Dropup (upar ki taraf) shift karo taake clipping ka koi chance hi na rahe */
+.custom-comment-dropdown,
+.comment-item .dropdown-menu {
+    position: absolute !important;
+    z-index: 9999 !important;
+     bottom: 100% !important;   
+    top: auto !important; 
+    right: 0 !important;
+    margin-bottom: 5px !important;
+}
+/* ==========================================
+   NAVBAR COMPLETE STYLING
+   ========================================== */
+nav, .navbar {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 12px 30px !important;
+    background-color: var(--navbar-bg, #ffffff) !important;
+    border-bottom: 1px solid var(--border, #e2e8f0) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Dark Mode Overrides for Navbar Container */
+body.dark-mode nav,
+body.dark nav,
+[data-theme="dark"] nav {
+    background-color: #1e293b !important;
+    border-bottom-color: #334155 !important;
+}
+
+/* Brand Logo Text */
+.navbar-brand, .logo-text {
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    color: var(--text, #0f172a) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    text-decoration: none !important;
+}
+
+body.dark-mode .navbar-brand,
+body.dark .navbar-brand,
+[data-theme="dark"] .navbar-brand {
+    color: #f8fafc !important;
+}
+
+/* Navbar Right Side (Toggle Switch + Avatar) */
+/* ==========================================
+   NAVBAR DYNAMIC LIGHT/DARK STYLING
+   ========================================== */
+.custom-navbar {
+    background-color: var(--navbar-bg) !important;
+    border-bottom: 1px solid var(--border) !important;
+    padding: 10px 20px !important;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Logo Box Fix */
+.logo-icon-box {
+    width: 36px;
+    height: 36px;
+    background: #10b981;
+    color: #ffffff;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.brand-text {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text) !important;
+}
+
+/* Navbar Toggler icon color fix for Light/Dark mode */
+.navbar-toggler {
+    border-color: var(--border) !important;
+}
+
+.navbar-toggler-icon {
+    filter: invert(var(--toggler-invert, 0));
+}
+
+[data-theme="dark"] .navbar-toggler-icon,
+body.dark-mode .navbar-toggler-icon {
+    --toggler-invert: 1;
+}
+
+/* Theme Switch Positioning Fix */
+.theme-switch {
+    margin-bottom: 0 !important;
+    display: flex;
+    align-items: center;
+}
+/* ==========================================
+   THEME SWITCH TOGGLE (Sun / Moon Icon Fix)
+   ========================================== */
+
+.theme-switch {
+  position: relative;
+  display: inline-block;
+  width: 54px;
+  height: 28px;
+  margin: 0;
+}
+
+/* Hide default checkbox */
+.theme-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Slider Track */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #e2e8f0;
+  transition: 0.4s;
+  border-radius: 30px;
+  border: 1px solid #cbd5e1;
+}
+
+/* Moving Circle (Thumb) */
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 2px;
+  background-color: #10b981; /* Emerald Green */
+  transition: 0.4s;
+  border-radius: 50%;
+  z-index: 2;
+}
+
+/* Icons Styling Inside Slider */
+.theme-switch .sun-icon,
+.theme-switch .moon-icon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px !important;
+  transition: opacity 0.3s ease;
+  z-index: 3;
+}
+
+/* Sun Icon Position (Left Side inside circle) */
+.theme-switch .sun-icon {
+  left: 7px;
+  color: #ffffff !important; /* White icon on green circle */
+  opacity: 1;
+}
+
+/* Moon Icon Position (Right Side inside circle when toggled) */
+.theme-switch .moon-icon {
+  right: 7px;
+  color: #ffffff !important;
+  opacity: 0;
+}
+
+/* Checked State (Dark Mode) */
+.theme-switch input:checked + .slider {
+  background-color: #0f172a;
+  border-color: #334155;
+}
+
+.theme-switch input:checked + .slider:before {
+  transform: translateX(25px);
+  background-color: #10b981;
+}
+
+/* Toggle Icon Visibility */
+.theme-switch input:checked + .slider .sun-icon {
+  opacity: 0;
+}
+
+.theme-switch input:checked + .slider .moon-icon {
+  opacity: 1;
+}
+/* Comment Item Container - Must be relative */
+
+/* ==========================
+   SWEETALERT2 CUSTOM UI
+========================== */
+.swal2-popup {
+    background-color: var(--card-bg) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+    font-family: 'Poppins', system-ui, sans-serif !important;
+}
+
+.swal2-title {
+    color: var(--text) !important;
+    font-size: 20px !important;
+    font-weight: 600 !important;
+}
+
+.swal2-html-container, .swal2-content {
+    color: var(--text-muted) !important;
+    font-size: 14px !important;
+}
+
+.swal2-confirm {
+    background-color: #0d9488 !important;
+    color: #ffffff !important;
+    border-radius: 8px !important;
+    padding: 10px 24px !important;
+}
+
+.swal2-cancel {
+    background-color: var(--header-bg) !important;
+    color: var(--text-muted) !important;
+    border-radius: 8px !important;
+}
+
+/* ==========================
+   ANIMATIONS & RESPONSIVE
+========================== */
+.posts .card {
+    animation: fade .4s ease;
+}
+
+@keyframes fade {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+/* ===================================================
+   EMPTY STATE CARD - ZERO GREY OVERRIDE
+   =================================================== */
+
+/* ☀️ 1. LIGHT MODE (Pure White - Post Card Match) */
+.empty-state-card {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+.empty-state-card .empty-icon {
+  color: #10b981 !important; /* Green Search Icon */
+}
+
+.empty-state-card .empty-title {
+  color: #0f172a !important; /* Dark Heading Text */
+}
+
+.empty-state-card .empty-text {
+  color: #64748b !important; /* Clean Gray Paragraph Text */
+}
+
+.empty-state-card strong {
+  color: #10b981 !important;
+}
+
+/* 🌙 2. DARK MODE (Only applies when Dark Theme is ON) */
+body.dark-mode .empty-state-card,
+[data-theme="dark"] .empty-state-card {
+  background-color: #182232 !important; /* Dashboard Dark Color */
+  background: #182232 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+body.dark-mode .empty-state-card .empty-title,
+[data-theme="dark"] .empty-state-card .empty-title {
+  color: #ffffff !important;
+}
+
+body.dark-mode .empty-state-card .empty-text,
+[data-theme="dark"] .empty-state-card .empty-text {
+  color: #94a3b8 !important;
+}
+/* Custom Cursor Styling */
+body {
+    cursor: default;
+}
+
+.cursor-dot {
+    width: 6px;
+    height: 6px;
+    background-color: #10b981; /* Emerald Green */
+    border-radius: 50%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 99999;
+}
+
+.cursor-outline {
+    width: 30px;
+    height: 30px;
+    border: 2px solid #10b981;
+    border-radius: 50%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 99998;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+/* #pointer {
+  width: 18px;
+  height: 18px;
+  background-color: #10b981;
+  border-radius: 50%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none; 
+  z-index: 99999;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.7);
+} */
+ /* Foolproof and Blur Pointer Styling */
+ #pointer {
+  width: 18px;          /* Size chota karne ke liye (e.g. 14px ya 16px) */
+  height: 18px;
+  background-color: #10b981;
+  border-radius: 50%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 99999;
+  filter: blur(4px);    /* Soft blur effect */
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.8);
+}
+
+@media(max-width:992px) {
+    .postcont {
+        margin-bottom: 25px;
+    }
+}
+
+@media(max-width:768px) {
+    .card-title {
+        font-size: 24px;
+    }
+    .card-body {
+        min-height: 180px;
+    }
+    .navbar-brand {
+        font-size: 20px;
+    }
+}
