@@ -4,7 +4,7 @@ let userId = null;
 let currentFilter = "all";
 
 // ==========================================
-// 1. UI, THEME & ANIMATION FUNCTIONS
+// 1. THEME & PROFILE DROPDOWN SETUP
 // ==========================================
 
 function applyTheme(theme) {
@@ -31,30 +31,37 @@ function initTheme() {
 }
 
 function initProfileDropdown() {
-    const avatarBtn = document.getElementById('avatarBtn');
-    const profilePopup = document.getElementById('profilePopup');
+    const profileDropdownBtn = document.getElementById('profileDropdownBtn') || document.getElementById('avatarBtn');
+    const profileMenu = document.getElementById('profileMenu') || document.getElementById('profilePopup');
+    const uploadPicBtn = document.getElementById('uploadPicBtn');
+    const profilePicInput = document.getElementById('profilePicInput');
     const logoutBtn = document.getElementById('logoutBtn');
 
-    if (avatarBtn && profilePopup) {
-        avatarBtn.addEventListener('click', (e) => {
+    // 1. Toggle Dropdown Open / Close via .show Class
+    if (profileDropdownBtn && profileMenu) {
+        profileDropdownBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            profilePopup.classList.toggle('show');
+            profileMenu.classList.toggle("show");
         });
 
         document.addEventListener('click', (e) => {
-            if (!profilePopup.contains(e.target)) {
-                profilePopup.classList.remove('show');
+            if (!profileMenu.contains(e.target) && !profileDropdownBtn.contains(e.target)) {
+                profileMenu.classList.remove("show");
             }
         });
     }
 
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', async () => {
-            if (supabase) {
-                await supabase.auth.signOut();
-            }
-            window.location.href = "index.html";
+    // 2. Profile Picture Upload Trigger
+    if (uploadPicBtn && profilePicInput) {
+        uploadPicBtn.addEventListener('click', () => {
+            profilePicInput.click();
         });
+        profilePicInput.addEventListener('change', uploadProfilePicture);
+    }
+
+    // 3. Logout Action
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', logout);
     }
 }
 
@@ -81,7 +88,109 @@ function initGSAPAnimations() {
 }
 
 // ==========================================
-// 2. EVENTS SYSTEM LOGIC
+// 2. PROFILE PICTURE LOGIC
+// ==========================================
+
+async function loadUserProfileImage(uId) {
+    try {
+        const userAvatarImg = document.getElementById("userAvatarImg");
+        const userInitialText = document.getElementById("userInitialText") || document.getElementById("char") || document.getElementById("userAvatarText");
+
+        const { data: profile } = await supabase
+            .from("profiles")
+            .select("avatar_url")
+            .eq("id", uId)
+            .maybeSingle();
+
+        if (profile && profile.avatar_url) {
+            if (userAvatarImg) {
+                userAvatarImg.src = profile.avatar_url;
+                userAvatarImg.classList.remove("d-none");
+            }
+            if (userInitialText) userInitialText.classList.add("d-none");
+        }
+    } catch (err) {
+        console.error("Error fetching avatar:", err);
+    }
+}
+
+async function uploadProfilePicture(e) {
+    const file = e.target.files[0];
+    if (!file || !userId) return;
+
+    try {
+        if (typeof Swal !== "undefined") {
+            Swal.fire({ title: 'Uploading...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        }
+
+        const fileExt = file.name.split('.').pop();
+        const filePath = `avatars/${userId}-${Date.now()}.${fileExt}`;
+
+        // Upload to Storage Bucket
+        const { error: uploadError } = await supabase.storage
+            .from("avatars")
+            .upload(filePath, file, { upsert: true });
+
+        if (uploadError) throw uploadError;
+
+        // Get Public URL
+        const { data: publicUrlData } = supabase.storage
+            .from("avatars")
+            .getPublicUrl(filePath);
+
+        const publicUrl = publicUrlData.publicUrl;
+
+        // Save URL in database
+        await supabase
+            .from("profiles")
+            .upsert({ id: userId, avatar_url: publicUrl, updated_at: new Date() });
+
+        // Update UI Elements
+        const userAvatarImg = document.getElementById("userAvatarImg");
+        const userInitialText = document.getElementById("userInitialText") || document.getElementById("char") || document.getElementById("userAvatarText");
+
+        if (userAvatarImg) {
+            userAvatarImg.src = publicUrl;
+            userAvatarImg.classList.remove("d-none");
+        }
+        if (userInitialText) userInitialText.classList.add("d-none");
+
+        if (typeof Swal !== "undefined") {
+            Swal.fire({ icon: 'success', title: 'Profile Picture Updated!', timer: 1500, showConfirmButton: false });
+        } else {
+            alert("Profile Picture Updated!");
+        }
+
+    } catch (err) {
+        console.error("Upload Error:", err);
+        if (typeof Swal !== "undefined") {
+            Swal.fire("Upload Failed", err.message || "Could not upload image.", "error");
+        } else {
+            alert("Upload failed: " + err.message);
+        }
+    }
+}
+
+async function logout() {
+    if (supabase) {
+        await supabase.auth.signOut();
+    }
+    if (typeof Swal !== "undefined") {
+        Swal.fire({
+            icon: 'success',
+            title: 'Logged Out',
+            timer: 1200,
+            showConfirmButton: false
+        }).then(() => {
+            window.location.href = "index.html";
+        });
+    } else {
+        window.location.href = "index.html";
+    }
+}
+
+// ==========================================
+// 3. EVENTS SYSTEM LOGIC
 // ==========================================
 
 // Fetch User & Initialize
@@ -90,14 +199,43 @@ async function checkUserSession() {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
             userId = user.id;
-            const firstLetter = (user.email || "U").charAt(0).toUpperCase();
 
-            // Checking both possible IDs for avatar and email elements
-            const userAvatar = document.getElementById("char") || document.getElementById("userAvatarText");
-            if (userAvatar) userAvatar.innerText = firstLetter;
+            // Fetch dynamic display name
+            let displayName = "";
+            const { data: profile } = await supabase
+                .from("profiles")
+                .select("full_name, name")
+                .eq("id", user.id)
+                .maybeSingle();
 
+            if (profile && (profile.full_name || profile.name)) {
+                displayName = profile.full_name || profile.name;
+            } else if (user.user_metadata) {
+                displayName = user.user_metadata.full_name || user.user_metadata.name || `${user.user_metadata.first_name || ""} ${user.user_metadata.last_name || ""}`.trim();
+            }
+
+            if (!displayName && user.email) {
+                const prefix = user.email.split("@")[0];
+                displayName = prefix.charAt(0).toUpperCase() + prefix.slice(1);
+            }
+
+            if (!displayName) displayName = "User";
+
+            const firstLetter = displayName.charAt(0).toUpperCase();
+
+            // Set text elements safely
+            const navUserName = document.getElementById("navUserName");
+            const userAvatarText = document.getElementById("char") || document.getElementById("userAvatarText") || document.getElementById("userInitialText");
             const userEmailText = document.getElementById("dropdownEmail") || document.getElementById("userEmailText");
+
+            if (navUserName) navUserName.innerText = displayName;
+            if (userAvatarText) userAvatarText.innerText = firstLetter;
             if (userEmailText) userEmailText.innerText = user.email;
+
+            // Load user profile picture
+            await loadUserProfileImage(userId);
+        } else {
+            window.location.href = "index.html";
         }
     } catch (err) {
         console.log("Auth session error:", err);
@@ -185,7 +323,7 @@ function createEventCard(event, count, isJoined) {
             <div class="d-flex justify-content-between align-items-center">
                 ${isJoined ?
             `<button class="btn btn-outline-danger btn-sm" onclick="toggleJoin('${event.id}', true)">Cancel Registration</button>` :
-            `<button class="btn btn-success btn-sm" onclick="toggleJoin('${event.id}',true )">Join Event</button>`
+            `<button class="btn btn-success btn-sm" onclick="toggleJoin('${event.id}', false)">Join Event</button>`
         }
                 ${userId === event.user_id ?
             `<button class="btn btn-sm text-danger" onclick="deleteEvent('${event.id}')"><i class="bi bi-trash"></i></button>` : ''
@@ -226,11 +364,9 @@ async function createEvent(e) {
         return;
     }
 
-    // --- Image File Handling Fix ---
     let imageUrl = "";
 
     if (imageInput && imageInput.files && imageInput.files[0]) {
-        // Agar file upload input hai
         const file = imageInput.files[0];
         imageUrl = await new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -239,7 +375,6 @@ async function createEvent(e) {
             reader.readAsDataURL(file);
         });
     } else if (imageInput && imageInput.value) {
-        // Agar simple URL text input hai
         imageUrl = imageInput.value.trim();
     }
 
@@ -262,7 +397,6 @@ async function createEvent(e) {
             alert("Event Created Successfully!");
         }
 
-        // Form inputs safely cleared
         if (titleInput) titleInput.value = "";
         if (descInput) descInput.value = "";
         if (dateInput) dateInput.value = "";
@@ -280,7 +414,6 @@ async function createEvent(e) {
 
 // Join / Cancel Registration Toggle
 async function toggleJoin(eventId, isJoined) {
-    console.log(`Toggling join for event ${eventId}, currently joined: ${isJoined}`);
     if (!userId) {
         alert("Please login first to join events!");
         return;
@@ -315,7 +448,7 @@ function setupRealtime() {
 }
 
 // ==========================================
-// 3. DOM LOADED INITIALIZATION
+// 4. DOM LOADED INITIALIZATION
 // ==========================================
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -353,7 +486,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// Window Exports (Required for HTML Inline Events)
+// Window Exports
 window.createEvent = createEvent;
 window.toggleJoin = toggleJoin;
 window.deleteEvent = deleteEvent;

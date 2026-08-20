@@ -81,7 +81,7 @@ async function signup(event) {
         confirmButtonText: 'OK'
     })
     setTimeout(() => {
-        window.location.href = "dashboard.html"
+        window.location.href = "welcome.html"
     }, 2500);
 }
 
@@ -125,7 +125,7 @@ async function login(event) {
                 showConfirmButton: '#10b981'
             });
             setTimeout(() => {
-                window.location.href = "dashboard.html"
+                window.location.href = "welcome.html"
             }, 2000);
         }
     } catch (error) {
@@ -173,7 +173,7 @@ async function loginWithGoogle() {
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-            redirectTo: `${window.location.origin}/dashboard.html`
+            redirectTo: `${window.location.origin}/welcome.html`
             // redirectTo: 'http://127.0.0.1:5500/dashboard.html'    
             // redirectTo: 'https://postifly-app.netlify.app/dashboard.html'    
             //redirectTo: 'https://rafiapanjwani7-afk.github.io/post_app/dashboard.html' 
