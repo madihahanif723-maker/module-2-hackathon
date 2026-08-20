@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - CampusConnect</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="CSS/welcome.css">
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar custom-navbar sticky-top">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+                <div class="logo-icon-box">
+                    <span class="logo-letter">C</span>
+                </div>
+                <span class="brand-text">CampusConnect</span>
+            </a>
+
+            <div class="d-flex align-items-center gap-3">
+                <!-- Theme Switcher -->
+                <div class="theme-switch-wrapper">
+                    <input type="checkbox" class="theme-toggle-checkbox" id="theme-toggle">
+                    <label class="theme-switch-label" for="theme-toggle">
+                        <i class="bi bi-sun-fill sun-icon"></i>
+                        <i class="bi bi-moon-fill moon-icon"></i>
+                        <span class="ball"></span>
+                    </label>
+                </div>
+
+                <!-- Profile Dropdown -->
+                <!-- Top-Right User Profile Dropdown -->
+                <div class="profile-dropdown position-relative">
+                    <!-- User Avatar / Profile Icon Button -->
+                    <div class="d-flex align-items-center gap-2 cursor-pointer" id="profileDropdownBtn">
+                        <div class="avatar-circle overflow-hidden d-flex align-items-center justify-content-center"
+                            id="avatarBox"
+                            style="width: 40px; height: 40px; border-radius: 50%; background-color: #0d9488;">
+                            <img id="userAvatarImg" src="" alt="Profile" class="w-100 h-100 object-fit-cover d-none">
+                            <span id="userInitialText" class="text-white fw-bold">U</span>
+                        </div>
+                        <span id="navUserName" class="text-light fw-medium d-none d-md-inline">User</span>
+                        <i class="bi bi-chevron-down text-light small"></i>
+                    </div>
+
+                    <!-- Dropdown Menu -->
+                    <div class="dropdown-popup custom-dropdown-menu p-2 shadow-lg rounded" id="profileMenu"
+                        style="display: none; position: absolute; right: 0; top: 50px; background-color: #111827; min-width: 200px; z-index: 1000; border: 1px solid #1f2937;">
+
+                        <!-- Hidden File Input for Image Upload -->
+                        <input type="file" id="profilePicInput" accept="image/*" class="d-none">
+
+                        <!-- Option 1: Upload Profile Picture -->
+                        <button
+                            class="dropdown-item d-flex align-items-center gap-2 text-light py-2 px-3 rounded hover-bg"
+                            id="uploadPicBtn">
+                            <i class="bi bi-camera text-teal"></i> Upload Profile Picture
+                        </button>
+
+                        <!-- Option 2: Go to Dashboard -->
+                        <a href="welcome.html"
+                            class="dropdown-item d-flex align-items-center gap-2 text-light py-2 px-3 rounded hover-bg">
+                            <i class="bi bi-speedometer2 text-teal"></i> Go to Your Dashboard
+                        </a>
+
+                        <hr class="dropdown-divider border-secondary my-1">
+
+                        <!-- Option 3: Logout -->
+                        <button
+                            class="dropdown-item d-flex align-items-center gap-2 text-danger py-2 px-3 rounded hover-bg"
+                            id="logoutBtn">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container py-4">
+
+        <!-- Welcome Banner Section -->
+        <div class="card event-card-form welcome-card p-4 mb-4 shadow-sm">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <h2 class="form-title mb-1">Welcome, <span id="welcomeUserName" class="text-teal">User</span>! 👋
+                    </h2>
+                    <p class="event-desc mb-0">Here is what's happening across your campus community today.</p>
+                </div>
+                <!-- Quick Action Buttons -->
+                <div class="d-flex gap-2 flex-wrap">
+                    <!-- Redirects directly to post application dashboard.html -->
+                    <a href="dashboard.html" class="btn btn-emerald btn-sm"><i class="bi bi-plus-lg"></i> Create
+                        Post</a>
+                    <a href="event.html" class="btn btn-outline-emerald btn-sm"><i class="bi bi-calendar-event"></i>
+                        Create Event</a>
+                    <a href="partner.html" class="btn btn-outline-emerald btn-sm"><i class="bi bi-people"></i> Find
+                        Study Partner</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Widgets Grid (3rd Picture Style) -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3 col-6">
+                <div class="card event-card p-3 text-center">
+                    <span class="stat-icon text-teal mb-2"><i class="bi bi-file-earmark-post"></i></span>
+                    <h6 class="event-desc mb-1">Total Posts</h6>
+                    <h3 class="event-title text-teal mb-0" id="statTotalPosts">0</h3>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card event-card p-3 text-center">
+                    <span class="stat-icon text-teal mb-2"><i class="bi bi-calendar-check"></i></span>
+                    <h6 class="event-desc mb-1">Upcoming Events</h6>
+                    <h3 class="event-title text-teal mb-0" id="statUpcomingEvents">0</h3>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card event-card p-3 text-center">
+                    <span class="stat-icon text-teal mb-2"><i class="bi bi-megaphone"></i></span>
+                    <h6 class="event-desc mb-1">Announcements</h6>
+                    <h3 class="event-title text-teal mb-0" id="statAnnouncements">0</h3>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card event-card p-3 text-center">
+                    <span class="stat-icon text-teal mb-2"><i class="bi bi-bell"></i></span>
+                    <h6 class="event-desc mb-1">Notifications</h6>
+                    <h3 class="event-title text-teal mb-0" id="statNotifications">0</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Announcements & Upcoming Events Grid -->
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="card event-card-form p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="form-title mb-0"><i class="bi bi-megaphone text-teal"></i> Latest Announcements</h5>
+                        <a href="#" class="text-teal text-decoration-none small">View All</a>
+                    </div>
+                    <div id="announcementsList" class="d-flex flex-column gap-2">
+                        <p class="event-desc text-muted mb-0">No new announcements at the moment.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card event-card-form p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="form-title mb-0"><i class="bi bi-calendar-event text-teal"></i> Upcoming Events</h5>
+                        <a href="event.html" class="text-teal text-decoration-none small">View All</a>
+                    </div>
+                    <div id="eventsList" class="d-flex flex-column gap-2">
+                        <p class="event-desc text-muted mb-0">Loading events...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script type="module" src="JS/welcome.js"></script>
+</body>
+
+</html>

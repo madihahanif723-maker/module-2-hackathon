@@ -812,6 +812,25 @@ if (themeToggleBtn) {
         applyTheme(e.target.checked ? 'dark' : 'light');
     });
 }
+// Dropdown Toggle Open/Close Function
+window.toggleProfileMenu = function () {
+    const popup = document.getElementById("profilePopup");
+    if (popup) {
+        popup.classList.toggle("show");
+    }
+};
+
+// Bahar Click Karne Par Dropdown Automatic Close Karne Ka Handler
+window.addEventListener("click", function (e) {
+    const dropdown = document.querySelector(".profile-dropdown");
+    const popup = document.getElementById("profilePopup");
+
+    // Agar click dropdown button ya popup ke andar na ho
+    if (dropdown && popup && !dropdown.contains(e.target)) {
+        popup.classList.remove("show");
+    }
+});
+
 
 // Initialization
 (function initTheme() {
@@ -845,6 +864,7 @@ window.createPostCard = createPostCard;
 window.realTimePost = realTimePost;
 window.realTimeLikes = realTimeLikes;
 window.deleteComment = deleteComment;
+window.loadUserProfile = loadUserProfile;
 // 1. Plugins Register Karein
 /* ===================================================
    POSTIFY APP - GSAP STRING EFFECT & POINTER

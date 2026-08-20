@@ -13,90 +13,120 @@
 <body>
   <div id="pointer"></div>
 
-   <nav class="navbar navbar-expand-lg custom-navbar ">
+  <nav class="navbar navbar-expand-lg custom-navbar ">
     <div class="container-fluid">
 
-        <!-- Brand Logo -->
-        <a class="navbar-brand d-flex align-items-center gap-2" href="#">
-            <div class="logo-icon-box">
-                <span class="logo-letter">C</span>
-            </div>
-            <span class="brand-text">CampusConnect</span>
-        </a>
+      <!-- Brand Logo -->
+      <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+        <div class="logo-icon-box">
+          <span class="logo-letter">C</span>
+        </div>
+        <span class="brand-text">CampusConnect</span>
+      </a>
 
-        <!-- Mobile Toggler -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-            data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-            aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+      <!-- Mobile Toggler -->
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
-        <!-- Nav Links -->
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-lg-2">
-                <li class="nav-item">
-                    <a class="nav-link active" href="dashboard.html">Create Post</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" aria-current="page" href="event.html">Create Event</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="study-partners.html">Find Study Partner</a>
-                </li>
+      <!-- Nav Links -->
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-lg-2">
+          <li class="nav-item">
+            <a class="nav-link active" href="dashboard.html">Create Post</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" aria-current="page" href="event.html">Create Event</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="study-partners.html">Find Study Partner</a>
+          </li>
+        </ul>
+
+        <!-- Controls -->
+        <div class="d-flex align-items-center gap-3 my-2 my-lg-0 ms-auto">
+
+          <!-- Admin Panel Button -->
+          <a href="adminpanel.html" id="admin-panel-btn" class="btn btn-sm btn-info d-none me-1">
+            <i class="bi bi-shield-lock-fill"></i> Admin Panel
+          </a>
+
+          <!-- 🔔 NOTIFICATION DROPDOWN (NEW) -->
+          <div class="dropdown">
+            <button class="btn btn-link text-white position-relative p-0 border-0" type="button" id="notifDropdown"
+              data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-bell-fill fs-5"></i>
+              <span id="notifCount"
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                style="display: none; font-size: 0.65rem;">
+                0
+              </span>
+            </button>
+
+            <ul class="dropdown-menu dropdown-menu-end shadow mt-2" aria-labelledby="notifDropdown"
+              id="notificationsList" style="width: 300px; max-height: 380px; overflow-y: auto;">
+              <li class="dropdown-item text-muted text-center py-2">No new notifications</li>
             </ul>
+          </div>
 
-            <!-- Controls -->
-            <div class="d-flex align-items-center gap-3 my-2 my-lg-0 ms-auto">
+          <!-- Dynamic Theme Switch -->
+          <div class="theme-switch-wrapper">
+            <input type="checkbox" id="theme-toggle" class="theme-toggle-checkbox">
+            <label for="theme-toggle" class="theme-switch-label">
+              <i class="bi bi-sun-fill sun-icon"></i>
+              <i class="bi bi-moon-stars-fill moon-icon"></i>
+              <span class="ball"></span>
+            </label>
+          </div>
 
-                <!-- Admin Panel Button -->
-                <a href="adminpanel.html" id="admin-panel-btn" class="btn btn-sm btn-info d-none me-1">
-                    <i class="bi bi-shield-lock-fill"></i> Admin Panel
-                </a>
-
-                <!-- 🔔 NOTIFICATION DROPDOWN (NEW) -->
-                <div class="dropdown">
-                    <button class="btn btn-link text-white position-relative p-0 border-0" type="button" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-bell-fill fs-5"></i>
-                        <span id="notifCount" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none; font-size: 0.65rem;">
-                            0
-                        </span>
-                    </button>
-
-                    <ul class="dropdown-menu dropdown-menu-end shadow mt-2" aria-labelledby="notifDropdown" id="notificationsList" style="width: 300px; max-height: 380px; overflow-y: auto;">
-                        <li class="dropdown-item text-muted text-center py-2">No new notifications</li>
-                    </ul>
-                </div>
-
-                <!-- Dynamic Theme Switch -->
-                <div class="theme-switch-wrapper">
-                    <input type="checkbox" id="theme-toggle" class="theme-toggle-checkbox">
-                    <label for="theme-toggle" class="theme-switch-label">
-                        <i class="bi bi-sun-fill sun-icon"></i>
-                        <i class="bi bi-moon-stars-fill moon-icon"></i>
-                        <span class="ball"></span>
-                    </label>
-                </div>
-
-                <!-- Profile Dropdown -->
-                <div class="profile-dropdown" id="logoutBtn">
-            <div class="avatar-circle" onclick="toggleProfileMenu()">
-              <span id="userInitial">U</span>
+          <!-- Profile Dropdown -->
+          <div class="profile-dropdown position-relative">
+            <!-- User Avatar / Profile Icon Button -->
+            <div class="d-flex align-items-center gap-2 cursor-pointer" id="profileDropdownBtn">
+              <div class="avatar-circle overflow-hidden d-flex align-items-center justify-content-center" id="avatarBox"
+                style="width: 40px; height: 40px; border-radius: 50%; background-color: #0d9488;">
+                <img id="userAvatarImg" src="" alt="Profile" class="w-100 h-100 object-fit-cover d-none">
+                <span id="userInitialText" class="text-white fw-bold">U</span>
+              </div>
+              <span id="navUserName" class="text-light fw-medium d-none d-md-inline">User</span>
+              <i class="bi bi-chevron-down text-light small"></i>
             </div>
 
-            <div class="dropdown-popup" id="profilePopup">
-              <p class="user-email-text" id="dropdownEmail">user@mail.com</p>
-              <hr class="dropdown-divider">
-              <button class="dropdown-logout-btn" onclick="logout()">
-                <i class="bi bi-box-arrow-right me-2"></i> Logout
+            <!-- Dropdown Menu -->
+            <div class="dropdown-popup custom-dropdown-menu p-2 shadow-lg rounded" id="profileMenu"
+              style="display: none; position: absolute; right: 0; top: 50px; background-color: #111827; min-width: 200px; z-index: 1000; border: 1px solid #1f2937;">
+
+              <!-- Hidden File Input for Image Upload -->
+              <input type="file" id="profilePicInput" accept="image/*" class="d-none">
+
+              <!-- Option 1: Upload Profile Picture -->
+              <button class="dropdown-item d-flex align-items-center gap-2 text-light py-2 px-3 rounded hover-bg"
+                id="uploadPicBtn">
+                <i class="bi bi-camera text-teal"></i> Upload Profile Picture
+              </button>
+
+              <!-- Option 2: Go to Dashboard -->
+              <a href="welcome.html"
+                class="dropdown-item d-flex align-items-center gap-2 text-light py-2 px-3 rounded hover-bg">
+                <i class="bi bi-speedometer2 text-teal"></i> Go to Your Dashboard
+              </a>
+
+              <hr class="dropdown-divider border-secondary my-1">
+
+              <!-- Option 3: Logout -->
+              <button class="dropdown-item d-flex align-items-center gap-2 text-danger py-2 px-3 rounded hover-bg"
+                id="logoutBtn">
+                <i class="bi bi-box-arrow-right"></i> Logout
               </button>
             </div>
           </div>
 
-            </div>
         </div>
+      </div>
 
     </div>
-</nav>
+  </nav>
   <div class="container ptCont mt-5 my-4 " id="postContainer">
     <div class="row">
       <div class="col-sm-12 col-md-6 col-lg-4">
@@ -147,18 +177,13 @@
       </div>
       <div class="col-sm-12 col-md-6 col-lg-8">
         <div class="search-box m-2">
-  <!-- 1. Live Search: Jab user type karega toh 'oninput' se search chalega -->
-  <input 
-    class="form-control" 
-    type="search" 
-    id="searchInput" 
-    placeholder="Search posts..." 
-    oninput="searchPosts()" 
-  />
-  <button class="search-btn" onclick="searchPosts()">
-    <i class="bi bi-search"></i>
-  </button>
-</div>
+          <!-- 1. Live Search: Jab user type karega toh 'oninput' se search chalega -->
+          <input class="form-control" type="search" id="searchInput" placeholder="Search posts..."
+            oninput="searchPosts()" />
+          <button class="search-btn" onclick="searchPosts()">
+            <i class="bi bi-search"></i>
+          </button>
+        </div>
         <div id="posts" class="posts m-2"></div>
       </div>
     </div>
