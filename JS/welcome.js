@@ -15,6 +15,14 @@ function applyTheme(theme) {
     if (themeToggleBtn) {
         themeToggleBtn.checked = (theme === "dark");
     }
+     const navUserText = document.querySelectorAll("#navUserName, .user-name, #profileDropdownBtn span");
+    navUserText.forEach(text => {
+        text.style.setProperty(
+            "color",
+            theme === "dark" ? "#ffffff" : "#0f172a",
+            "important"
+        );
+    });
 }
 
 function initTheme() {
@@ -31,7 +39,6 @@ function initProfileDropdown() {
     const profilePicInput = document.getElementById('profilePicInput');
     const logoutBtn = document.getElementById('logoutBtn');
 
-    // 1. Toggle Dropdown Open / Close via Class Sync
     if (profileDropdownBtn && profileMenu) {
         profileDropdownBtn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -45,7 +52,6 @@ function initProfileDropdown() {
         });
     }
 
-    // 2. Profile Picture Upload Trigger
     if (uploadPicBtn && profilePicInput) {
         uploadPicBtn.addEventListener('click', () => {
             profilePicInput.click();
@@ -53,7 +59,6 @@ function initProfileDropdown() {
         profilePicInput.addEventListener('change', uploadProfilePicture);
     }
 
-    // 3. Logout Action
     if (logoutBtn) {
         logoutBtn.addEventListener('click', logout);
     }
@@ -98,26 +103,22 @@ async function uploadProfilePicture(e) {
         const fileExt = file.name.split('.').pop();
         const filePath = `avatars/${userid}-${Date.now()}.${fileExt}`;
 
-        // Upload to Storage Bucket
         const { error: uploadError } = await supabase.storage
             .from("avatars")
             .upload(filePath, file, { upsert: true });
 
         if (uploadError) throw uploadError;
 
-        // Get Public URL
         const { data: publicUrlData } = supabase.storage
             .from("avatars")
             .getPublicUrl(filePath);
 
         const publicUrl = publicUrlData.publicUrl;
 
-        // Save URL in database
         await supabase
             .from("profiles")
             .upsert({ id: userid, avatar_url: publicUrl, updated_at: new Date() });
 
-        // Update UI Elements
         const userAvatarImg = document.getElementById("userAvatarImg");
         const userInitialText = document.getElementById("userInitialText");
 
@@ -162,12 +163,11 @@ async function logout() {
 }
 
 // ==========================================
-// 3. FETCH COUNTS & DATA LOOP LOGIC
+// 3. FETCH COUNTS & DATA LOGIC
 // ==========================================
 
 async function loadDashboardData() {
     try {
-        // 1. Check Authenticated User
         const { data: { user }, error: authError } = await supabase.auth.getUser();
 
         if (authError || !user) {
@@ -177,7 +177,6 @@ async function loadDashboardData() {
 
         userid = user.id;
 
-        // Extract Dynamic Display Name
         let displayName = "";
         const { data: profile } = await supabase
             .from("profiles")
@@ -200,7 +199,6 @@ async function loadDashboardData() {
 
         const firstLetter = displayName.charAt(0).toUpperCase();
 
-        // UI text elements update
         const navUserName = document.getElementById("navUserName");
         const welcomeUserName = document.getElementById("welcomeUserName");
         const userInitialText = document.getElementById("userInitialText");
@@ -209,24 +207,24 @@ async function loadDashboardData() {
         if (welcomeUserName) welcomeUserName.innerText = displayName;
         if (userInitialText) userInitialText.innerText = firstLetter;
 
-        // Fetch Avatar Image
         await loadUserProfileImage(userid);
 
-        // 2. Fetch Total Posts Count
-        await fetchTotalPostsCount();
+        // Fetch Dashboard Stat Data
+        await Promise.all([
+            fetchTotalPostsCount(),
+            fetchEventsData(),
+            fetchAnnouncementsData(),
+            fetchNotificationsCount()
+        ]);
 
-        // 3. Fetch Events Count and Loop List
-        await fetchEventsData();
-
-        // 4. Fetch Announcements Count
-        await fetchAnnouncementsData();
+        // Real-Time Listeners Enable Karein
+        setupRealtimeListeners();
 
     } catch (err) {
         console.error("Dashboard Load Error:", err);
     }
 }
 
-// Fetch Total Posts Count
 async function fetchTotalPostsCount() {
     try {
         const { count, error } = await supabase
@@ -242,25 +240,79 @@ async function fetchTotalPostsCount() {
     }
 }
 
-// Fetch Upcoming Events Count & List
+// Fetch Announcements Count & Render List
+async function fetchAnnouncementsData() {
+    const announcementsList = document.getElementById("announcementsList");
+    const statAnnouncements = document.getElementById("statAnnouncements");
+
+    try {
+        // Table name Capital 'Announcements' use kiya hai
+        const { data: announcements, count, error } = await supabase
+            .from("Announcements")
+            .select("*", { count: 'exact' })
+            .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        // Stat counter set karein
+        if (statAnnouncements) {
+            statAnnouncements.innerText = count !== null ? count : 0;
+        }
+
+        // Announcements UI render karein
+        if (announcements && announcements.length > 0 && announcementsList) {
+            announcementsList.innerHTML = "";
+            
+            announcements.slice(0, 3).forEach(item => {
+                const title = item.title || "Announcement";
+                const content = item.message || ""; // Exact column 'message' map ho gaya
+                const date = item.created_at ? new Date(item.created_at).toLocaleDateString() : "";
+
+                announcementsList.innerHTML += `
+                    <div class="p-2 border-bottom border-secondary border-opacity-25">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <h6 class="event-title text-teal mb-0" style="font-size: 0.95rem;">${title}</h6>
+                            <small class="text-muted" style="font-size: 0.75rem;">${date}</small>
+                        </div>
+                        <p class="event-desc text-muted mb-0 small">${content}</p>
+                    </div>
+                `;
+            });
+        } else if (announcementsList) {
+            announcementsList.innerHTML = `<p class="event-desc text-muted mb-0">No new announcements at the moment.</p>`;
+        }
+    } catch (err) {
+        console.error("Announcements Fetch Error:", err);
+        if (statAnnouncements) statAnnouncements.innerText = "0";
+        if (announcementsList) {
+            announcementsList.innerHTML = `<p class="event-desc text-muted mb-0">No new announcements at the moment.</p>`;
+        }
+    }
+}
+
+// Fetch Approved Events Data & Update Stat Counter
 async function fetchEventsData() {
     const eventsList = document.getElementById("eventsList");
+    const statUpcomingEvents = document.getElementById("statUpcomingEvents");
+
     try {
         const { data: events, count, error } = await supabase
             .from("events")
             .select("*", { count: 'exact' })
+            .eq("status", "approved")
             .order("created_at", { ascending: false });
 
-        if (!error && count !== null) {
-            const statUpcomingEvents = document.getElementById("statUpcomingEvents");
-            if (statUpcomingEvents) statUpcomingEvents.innerText = count;
+        if (error) throw error;
+
+        if (statUpcomingEvents) {
+            statUpcomingEvents.innerText = count !== null ? count : 0;
         }
 
         if (events && events.length > 0 && eventsList) {
             eventsList.innerHTML = "";
             events.slice(0, 3).forEach(evt => {
                 eventsList.innerHTML += `
-                    <div class="p-2 border-bottom border-secondary">
+                    <div class="p-2 border-bottom border-secondary border-opacity-25">
                         <h6 class="event-title text-teal mb-1" style="font-size: 0.95rem;">${evt.title || evt.event_name || 'Campus Event'}</h6>
                         <small class="event-desc text-muted">${evt.location || 'Campus'} • ${evt.event_date || 'Upcoming'}</small>
                     </div>
@@ -270,38 +322,39 @@ async function fetchEventsData() {
             eventsList.innerHTML = `<p class="event-desc text-muted mb-0">No upcoming events found.</p>`;
         }
     } catch (err) {
-        console.log("Error fetching events:", err);
+        console.error("Events Fetch Error:", err);
+        if (statUpcomingEvents) statUpcomingEvents.innerText = "0";
+        if (eventsList) {
+            eventsList.innerHTML = `<p class="event-desc text-muted mb-0">No upcoming events found.</p>`;
+        }
     }
 }
 
-// Fetch Announcements Count & List
-async function fetchAnnouncementsData() {
-    const announcementsList = document.getElementById("announcementsList");
+async function fetchNotificationsCount() {
     try {
-        const { data: announcements, count, error } = await supabase
-            .from("announcements")
-            .select("*", { count: 'exact' })
-            .order("created_at", { ascending: false });
+        const statNotifications = document.getElementById("statNotifications");
+        
+        // Notifications count fetch
+        const { count, error } = await supabase
+            .from("notifications")
+            .select("*", { count: 'exact', head: true });
 
-        if (!error && count !== null) {
-            const statAnnouncements = document.getElementById("statAnnouncements");
-            if (statAnnouncements) statAnnouncements.innerText = count;
-        }
-
-        if (announcements && announcements.length > 0 && announcementsList) {
-            announcementsList.innerHTML = "";
-            announcements.slice(0, 3).forEach(item => {
-                announcementsList.innerHTML += `
-                    <div class="p-2 border-bottom border-secondary">
-                        <h6 class="event-title text-teal mb-1" style="font-size: 0.95rem;">${item.title}</h6>
-                        <small class="event-desc text-muted">${item.description || ''}</small>
-                    </div>
-                `;
-            });
+        if (!error && statNotifications) {
+            statNotifications.innerText = count !== null ? count : 0;
         }
     } catch (err) {
-        console.log("Announcements check error/table missing.");
+        console.error("Notifications Fetch Error:", err);
     }
+}
+
+// Real-Time Listeners setup for live announcements
+function setupRealtimeListeners() {
+    supabase
+        .channel('public:announcements')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'announcements' }, () => {
+            fetchAnnouncementsData();
+        })
+        .subscribe();
 }
 
 // ==========================================
