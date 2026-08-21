@@ -22,6 +22,8 @@
     --primary-hover: #0f766e;
     --border: #e2e8f0;
 }
+/* Interactive elements ke liye pointer cursor */
+
 
 /* Dark Mode Variables */
 [data-theme="dark"], body.dark-mode, body.dark {
@@ -1034,4 +1036,60 @@ body {
     .navbar-brand {
         font-size: 20px;
     }
+}
+/* Root level attributes styling */
+[data-theme="dark"] {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="light"] {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+/* Light Mode Bell Icon Color */
+[data-theme="light"] .nav-bell-btn {
+  color: #0f172a !important;
+}
+
+/* Dark Mode Bell Icon Color */
+[data-theme="dark"] .nav-bell-btn {
+  color: #ffffff !important;
+}
+/* Interactive elements ke liye pointer cursor aur transitions */
+button,
+.btn,
+.colorbox,
+.bgImg,
+.comment-dots-btn,
+.dropdown-item,
+#uploadPicBtn,
+#profileDropdownBtn {
+    cursor: pointer !important;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), 
+                box-shadow 0.2s ease, 
+                background-color 0.2s ease, 
+                opacity 0.2s ease;
+}
+
+/* Hover effect: halka sa lift animation */
+.btn:hover,
+.colorbox:hover,
+.bgImg:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Click / Active state animation */
+.btn:active,
+.colorbox:active,
+.bgImg:active {
+    transform: translateY(0) scale(0.96);
+}
+
+/* Selected state animation for colors and background images */
+.colorbox.selected,
+.bgImg.addImg {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 3px #14b8a6, 0 4px 10px rgba(0, 0, 0, 0.2);
 }

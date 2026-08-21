@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Poll System | CampusConnect</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <!-- Project CSS -->
+    <link rel="stylesheet" href="CSS/event.css">
+    <link rel="stylesheet" href="CSS/poll.css">
+</head>
+
+<body>
+
+    <!-- Custom Pointer -->
+    <div id="pointer"></div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg custom-navbar">
+        <div class="container-fluid">
+
+            <!-- Brand -->
+            <a class="navbar-brand d-flex align-items-center gap-2" href="welcome.html">
+                <div class="logo-icon-box">
+                    <span class="logo-letter">C</span>
+                </div>
+                <span class="brand-text">CampusConnect</span>
+            </a>
+
+            <!-- Mobile Toggler -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Navbar Content -->
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+                <!-- Navigation Links -->
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-lg-2">
+                    <li class="nav-item">
+                        <a class="nav-link" href="dashboard.html">Create Post</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="event.html">Create Event</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="study-partners.html">Find Study Partner</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="poll.html">Polls</a>
+                    </li>
+                </ul>
+
+                <!-- RIGHT SIDE CONTROLS -->
+                <div class="d-flex align-items-center gap-3 my-2 my-lg-0 ms-auto">
+
+                    <!-- Admin Panel -->
+                    <a href="adminpanel.html" id="admin-panel-btn" class="btn btn-sm btn-info d-none">
+                        <i class="bi bi-shield-lock-fill"></i> Admin Panel
+                    </a>
+
+                    <!-- NOTIFICATION -->
+                    <div class="dropdown">
+                        <button class="btn btn-link position-relative p-0 border-0" type="button" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-bell-fill fs-5"></i>
+                            <span id="notifCount" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display:none; font-size:0.65rem;">0</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow mt-2" aria-labelledby="notifDropdown" id="notificationsList" style="width:300px; max-height:380px; overflow-y:auto;">
+                            <li class="dropdown-item text-muted text-center py-2">No new notifications</li>
+                        </ul>
+                    </div>
+
+                    <!-- THEME SWITCH -->
+                    <div class="theme-switch-wrapper">
+                        <input type="checkbox" id="theme-toggle" class="theme-toggle-checkbox">
+                        <label for="theme-toggle" class="theme-switch-label">
+                            <i class="bi bi-sun-fill sun-icon"></i>
+                            <i class="bi bi-moon-stars-fill moon-icon"></i>
+                            <span class="ball"></span>
+                        </label>
+                    </div>
+
+                    <!-- PROFILE -->
+                    <div class="dropdown">
+                        <button type="button" id="profileDropdownBtn" class="btn p-0 border-0 d-flex align-items-center gap-2" aria-expanded="false">
+                            <div class="user-avatar" style="width:40px; height:40px; border-radius:50%; overflow:hidden; background:#00c9a7; display:flex; align-items:center; justify-content:center; color:white; font-weight:700;">
+                                <img id="userAvatarImg" src="" alt="Profile" class="d-none" style="width:100%; height:100%; object-fit:cover;">
+                                <span id="userInitialText">U</span>
+                            </div>
+                            <span id="navUserName" class="profile-name fw-semibold d-none d-lg-inline">User</span>
+                            <i class="bi bi-chevron-down profile-name d-none d-lg-inline"></i>
+                        </button>
+
+                        <div class="dropdown-popup custom-dropdown-menu p-2 shadow-lg rounded" id="profileMenu" style="display:none; position:absolute; right:0; top:50px; background-color:#111827; min-width:230px; z-index:1000; border:1px solid #1f2937;">
+                            <div class="px-3 py-2">
+                                <div id="dropdownUserName" class="fw-semibold text-light">User</div>
+                                <small id="dropdownEmail" class="text-secondary">user@example.com</small>
+                            </div>
+                            <hr class="dropdown-divider border-secondary my-1">
+                            <input type="file" id="profilePicInput" accept="image/*" class="d-none">
+                            <button type="button" id="uploadPicBtn" class="dropdown-item d-flex align-items-center gap-2 text-light py-2 px-3 rounded hover-bg">
+                                <i class="bi bi-camera text-info"></i> Upload Profile Picture
+                            </button>
+                            <a href="welcome.html" class="dropdown-item d-flex align-items-center gap-2 text-light py-2 px-3 rounded hover-bg">
+                                <i class="bi bi-speedometer2 text-info"></i> Go to Your Dashboard
+                            </a>
+                            <hr class="dropdown-divider border-secondary my-1">
+                            <button type="button" id="logoutBtn" class="dropdown-item d-flex align-items-center gap-2 text-danger py-2 px-3 rounded hover-bg">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="container-fluid px-lg-5 py-4">
+        <div class="row g-4">
+
+            <!-- LEFT COLUMN: CREATE POLL FORM -->
+            <div class="col-lg-5 col-md-6">
+                <div class="card p-4 shadow-lg sticky-lg-top" style="top: 90px; z-index: 10;">
+                    <h4 class="mb-4 d-flex align-items-center">
+                        <i class="bi bi-plus-circle me-2 text-success"></i>
+                        Create a New Poll
+                    </h4>
+
+                    <form id="createPollForm">
+                        <!-- Question -->
+                        <div class="mb-4">
+                            <label for="pollQuestion" class="form-label text-secondary fw-semibold">Poll Question</label>
+                            <input type="text" id="pollQuestion" class="form-control form-control-lg" placeholder="e.g. Which technology should we learn next?" maxlength="250" autocomplete="off" required>
+                        </div>
+
+                        <!-- Options -->
+                        <div class="mb-3">
+                            <label class="form-label text-secondary fw-semibold">Poll Options</label>
+                            <div id="optionsContainer">
+                                <input type="text" class="form-control option-input mb-2" placeholder="Option 1" maxlength="150" required>
+                                <input type="text" class="form-control option-input mb-2" placeholder="Option 2" maxlength="150" required>
+                            </div>
+
+                            <button type="button" id="addOptionBtn" class="btn btn-outline-info btn-sm mt-1">
+                                <i class="bi bi-plus"></i> Add Option
+                            </button>
+                        </div>
+
+                        <!-- Publish -->
+                        <button type="submit" class="btn btn-emerald w-100 py-2 mt-3">
+                            <i class="bi bi-send me-1"></i> Publish Poll
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: ACTIVE POLLS FEED -->
+            <div class="col-lg-7 col-md-6">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="m-0">
+                        <i class="bi bi-card-checklist me-2"></i> Active Polls
+                    </h4>
+                </div>
+
+                <!-- Loading Spinner -->
+                <div id="pollsLoading" class="text-center py-4">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="text-muted mt-2 mb-0">Loading polls...</p>
+                </div>
+
+                <!-- Dynamic Polls List Container -->
+                <div id="pollsContainer"></div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- SCRIPTS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module" src="JS/poll.js"></script>
+
+</body>
+</html>

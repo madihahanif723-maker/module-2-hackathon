@@ -360,3 +360,52 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     background-color: #ef4444;
     color: #ffffff;
 }
+.profile-name {
+    font-size: 0.95rem;
+    font-weight: 900 !important;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    transition: color 0.25s ease;
+}
+
+/* Light Mode: Clear Dark Slate Text */
+[data-theme="light"] .profile-name,
+body:not([data-theme="dark"]) .profile-name {
+    color: #0f172a !important;
+}
+
+/* Dark Mode: Crisp Pure White Text */
+[data-theme="dark"] .profile-name {
+    color: #ffffff !important;
+}
+/* Light Mode Bell Icon Color */
+[data-theme="light"] .nav-bell-btn {
+  color: #0f172a !important;
+}
+
+/* Dark Mode Bell Icon Color */
+[data-theme="dark"] .nav-bell-btn {
+  color: #ffffff !important;
+}
+/* Light Mode (Default) - Card Style */
+.event-card {
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+    border-radius: 12px;
+}
+
+.event-card .card-text {
+    color: #475569 !important;
+}
+
+/* Dark Mode - Card Style */
+[data-theme="dark"] .event-card,
+body.dark-mode .event-card {
+    background-color: #1e293b !important;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .event-card .card-text,
+body.dark-mode .event-card .card-text {
+    color: #cbd5e1 !important;
+}

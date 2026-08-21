@@ -1,4 +1,10 @@
 import supabase from "../supabase.js";
+import { 
+  fetchNotifications, 
+  markAsRead, 
+  listenForNotifications, 
+  createNotification 
+} from "./notification.js"; // ✅ Matches exact filename
 
 // =====================================================
 // GLOBAL VARIABLES
@@ -20,7 +26,6 @@ let oldAvatarUrl = "";
 
 window.toggleProfileMenu = function () {
   const popup = document.getElementById("profilePopup");
-
   if (popup) {
     popup.classList.toggle("show");
   }
@@ -51,7 +56,7 @@ function showAlert(options = {}) {
   return Swal.fire({
     background: isDark ? "#0f172a" : "#ffffff",
     color: isDark ? "#f8fafc" : "#0f172a",
-    confirmButtonColor: "#10b981",
+    confirmButtonColor: "#00dfa2",
     cancelButtonColor: "#64748b",
     customClass: {
       popup: "custom-swal-popup"
@@ -62,7 +67,78 @@ function showAlert(options = {}) {
 
 
 // =====================================================
-// AUTHENTICATION
+// PROFILE DROPDOWN TOGGLE & EVENT LISTENERS
+// =====================================================
+
+function initProfileDropdown() {
+  const dropdownBtn = document.getElementById("profileDropdownBtn");
+  const profileMenu = document.getElementById("profileMenu");
+  const uploadPicBtn = document.getElementById("uploadPicBtn");
+  const profilePicInput = document.getElementById("profilePicInput");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  // 1. Toggle Dropdown Menu
+  if (dropdownBtn && profileMenu) {
+    dropdownBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      const isHidden = profileMenu.style.display === "none" || profileMenu.style.display === "";
+      profileMenu.style.display = isHidden ? "block" : "none";
+    });
+  }
+
+  // 2. Outside Click Par Dropdown Close Karna
+  window.addEventListener("click", function (e) {
+    if (profileMenu && !profileMenu.contains(e.target) && !dropdownBtn.contains(e.target)) {
+      profileMenu.style.display = "none";
+    }
+  });
+
+  // 3. Upload Picture Option Handle
+  if (uploadPicBtn && profilePicInput) {
+    uploadPicBtn.addEventListener("click", function () {
+      profilePicInput.click();
+    });
+
+    profilePicInput.addEventListener("change", async function (e) {
+      const file = e.target.files[0];
+      if (file) {
+        try {
+          const avatarUrl = await uploadAvatar(file);
+          if (avatarUrl) {
+            updateAvatarUI(avatarUrl);
+            await showAlert({
+              icon: "success",
+              title: "Updated!",
+              text: "Profile picture updated successfully."
+            });
+          }
+        } catch (err) {
+          showAlert({ icon: "error", title: "Error", text: err.message });
+        }
+      }
+    });
+  }
+
+  // 4. Logout Button Event
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", logout);
+  }
+}
+
+// UI Mein Avatar Image Set Karne Ka Helper
+function updateAvatarUI(url) {
+  const userAvatarImg = document.getElementById("userAvatarImg");
+  const userInitialText = document.getElementById("userInitialText");
+
+  if (url && userAvatarImg && userInitialText) {
+    userAvatarImg.src = url;
+    userAvatarImg.classList.remove("d-none");
+    userInitialText.classList.add("d-none");
+  }
+}
+
+// =====================================================
+// AUTHENTICATION & USER DATA POPULATION
 // =====================================================
 
 async function getCurrentUser() {
@@ -72,15 +148,7 @@ async function getCurrentUser() {
       error
     } = await supabase.auth.getUser();
 
-    if (error) {
-      console.log("Auth Error:", error);
-      return null;
-    }
-
-    if (!user) {
-      console.log("No active session found.");
-      return null;
-    }
+    if (error || !user) return null;
 
     userid = user.id;
     Email = user.email || "";
@@ -93,41 +161,65 @@ async function getCurrentUser() {
         user.user_metadata?.full_name ||
         user.user_metadata?.name ||
         user.email?.split("@")[0] ||
-        "Anonymous";
+        "User";
     }
 
     userRole = user.user_metadata?.role || "";
 
-    const userInitial = document.getElementById("userInitial");
-
-    if (userInitial) {
-      userInitial.innerText =
-        userName.charAt(0).toUpperCase();
+    // 1. Initial Letter Text Update
+    const userInitialText = document.getElementById("userInitialText");
+    if (userInitialText) {
+      userInitialText.innerText = userName.charAt(0).toUpperCase();
     }
 
-    const dropdownEmail =
-      document.getElementById("dropdownEmail");
-
-    if (dropdownEmail) {
-      dropdownEmail.innerText = Email;
+    // 2. Navbar Full Name Update
+    const navUserName = document.getElementById("navUserName");
+    if (navUserName) {
+      navUserName.innerText = userName;
     }
 
+    // 3. Avatar Image Check
+    const savedAvatarUrl = user.user_metadata?.avatar_url;
+    if (savedAvatarUrl) {
+      updateAvatarUI(savedAvatarUrl);
+    }
+
+    // 4. Admin Button Toggle
     if (userRole === "admin") {
-      const adminBtn =
-        document.getElementById("admin-panel-btn");
-
-      if (adminBtn) {
-        adminBtn.classList.remove("d-none");
-      }
+      const adminBtn = document.getElementById("admin-panel-btn");
+      if (adminBtn) adminBtn.classList.remove("d-none");
     }
 
     return user;
 
   } catch (error) {
-    console.log("User load error:", error);
+    console.error("User load error:", error);
     return null;
   }
 }
+
+// =====================================================
+// GLOBAL DROPDOWN TOGGLE FUNCTION
+// =====================================================
+
+window.toggleProfileMenu = function (e) {
+  if (e) e.stopPropagation();
+  const profileMenu = document.getElementById("profileMenu");
+
+  if (profileMenu) {
+    const isHidden = profileMenu.style.display === "none" || profileMenu.style.display === "";
+    profileMenu.style.display = isHidden ? "block" : "none";
+  }
+};
+
+window.addEventListener("click", function (e) {
+  const profileMenu = document.getElementById("profileMenu");
+  const dropdownBtn = document.getElementById("profileDropdownBtn");
+
+  if (profileMenu && dropdownBtn && !profileMenu.contains(e.target) && !dropdownBtn.contains(e.target)) {
+    profileMenu.style.display = "none";
+  }
+});
 
 
 // =====================================================
@@ -135,21 +227,14 @@ async function getCurrentUser() {
 // =====================================================
 
 function safeParseArray(data) {
-  if (!data) {
-    return [];
-  }
+  if (!data) return [];
 
-  if (Array.isArray(data)) {
-    return data;
-  }
+  if (Array.isArray(data)) return data;
 
   if (typeof data === "string") {
     try {
       const parsed = JSON.parse(data);
-
-      if (Array.isArray(parsed)) {
-        return parsed;
-      }
+      if (Array.isArray(parsed)) return parsed;
     } catch {
       return data
         .split(",")
@@ -182,39 +267,44 @@ function escapeHTML(value) {
 
 async function fetchStudyPartners() {
   try {
-    const {
-      data,
-      error
-    } = await supabase
+    const { data, error } = await supabase
       .from("profiles")
       .select(`
-                id,
-                user_id,
-                full_name,
-                avatar_url,
-                subjects,
-                skills,
-                experience_level,
-                availability,
-                bio
-            `)
-      .order("id", {
-        ascending: false
-      });
+        id,
+        user_id,
+        full_name,
+        avatar_url,
+        subjects,
+        skills,
+        experience_level,
+        availability,
+        bio
+      `)
+      .order("id", { ascending: false });
 
     if (error) {
-      console.log("Supabase Fetch Error:", error);
+      console.error("Supabase Fetch Error:", error);
+      await showAlert({
+        icon: "error",
+        title: "Data Error",
+        text: "Failed to fetch study partners."
+      });
       return;
     }
 
     allPartners = data || [];
-
     renderStudyPartners(allPartners);
 
   } catch (error) {
-    console.log("Fetch Study Partners Error:", error);
+    console.error("Fetch Study Partners Error:", error);
   }
 }
+
+
+// =====================================================
+// CREATE PARTNER CARD
+// =====================================================
+
 // =====================================================
 // CREATE PARTNER CARD
 // =====================================================
@@ -222,17 +312,13 @@ async function fetchStudyPartners() {
 function createPartnerCard(partner) {
   const subjects = safeParseArray(partner.subjects);
   const skills = safeParseArray(partner.skills);
+  const name = partner.full_name || "Anonymous";
 
-  const avatar =
-    partner.avatar_url ||
-    "https://via.placeholder.com/80";
-
-  const name =
-    partner.full_name ||
-    "Anonymous";
-
-  const isOwner =
-    userid && partner.user_id === userid;
+  // Dynamic initial avatar as fallback
+  const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=00dfa2&color=080f1f`;
+  const avatar = partner.avatar_url || fallbackAvatar;
+  
+  const isOwner = userid && partner.user_id === userid;
 
   const subjectsHTML = subjects.length
     ? subjects.map(subject => `
@@ -251,55 +337,35 @@ function createPartnerCard(partner) {
     : `<span class="text-muted small">No skills listed</span>`;
 
   return `
-    <div class="col-md-6 partner-card-item">
-
+    <div class="col-md-6 partner-card-item mb-4">
       <div
         class="card partner-card h-100 d-flex flex-column justify-content-between p-3"
         data-id="${escapeHTML(partner.id)}"
       >
-
         <div>
-
           <!-- HEADER -->
           <div class="d-flex align-items-center justify-content-between mb-3">
-
             <div class="d-flex align-items-center">
-
               <img
                 src="${escapeHTML(avatar)}"
                 alt="${escapeHTML(name)}"
                 class="partner-avatar me-3"
-                style="
-                  width:50px;
-                  height:50px;
-                  border-radius:50%;
-                  object-fit:cover;
-                "
-                onerror="this.src='https://via.placeholder.com/80';"
+                style="width:50px; height:50px; border-radius:50%; object-fit:cover;"
+                onerror="this.onerror=null; this.src='${fallbackAvatar}';"
               >
-
               <div>
-
-                <h5 class="mb-1 fw-bold">
-                  ${escapeHTML(name)}
-                </h5>
-
+                <h5 class="mb-1 fw-bold">${escapeHTML(name)}</h5>
                 <span class="badge badge-skill small">
                   <i class="fa-solid fa-graduation-cap me-1"></i>
-                  ${escapeHTML(
-                    partner.experience_level || "Student"
-                  )}
+                  ${escapeHTML(partner.experience_level || "Beginner")}
                 </span>
-
               </div>
-
             </div>
 
             ${
-              isOwner
+              isOwner || userRole === "admin"
                 ? `
                   <div class="action-buttons">
-
                     <button
                       type="button"
                       class="btn btn-sm btn-outline-primary me-1 edit-btn"
@@ -308,7 +374,6 @@ function createPartnerCard(partner) {
                     >
                       <i class="fa-solid fa-pen"></i>
                     </button>
-
                     <button
                       type="button"
                       class="btn btn-sm btn-outline-danger delete-btn"
@@ -317,91 +382,48 @@ function createPartnerCard(partner) {
                     >
                       <i class="fa-solid fa-trash"></i>
                     </button>
-
                   </div>
                 `
                 : ""
             }
-
           </div>
 
-
           <!-- BIO -->
-          <p
-            class="text-muted small mb-3"
-            style="line-height:1.5;"
-          >
-            ${escapeHTML(
-              partner.bio ||
-              "No introduction provided."
-            )}
+          <p class="text-muted small mb-3" style="line-height:1.5;">
+            ${escapeHTML(partner.bio || "No introduction provided.")}
           </p>
-
 
           <!-- SUBJECTS -->
           <div class="mb-2">
-
             <small
               class="d-block text-emerald fw-bold mb-1 text-uppercase"
-              style="
-                letter-spacing:0.5px;
-                font-size:11px;
-              "
+              style="letter-spacing:0.5px; font-size:11px;"
             >
               <i class="fa-solid fa-book me-1"></i>
               Subjects
             </small>
-
-            <div>
-              ${subjectsHTML}
-            </div>
-
+            <div>${subjectsHTML}</div>
           </div>
-
 
           <!-- SKILLS -->
           <div class="mb-3">
-
             <small
               class="d-block text-emerald fw-bold mb-1 text-uppercase"
-              style="
-                letter-spacing:0.5px;
-                font-size:11px;
-              "
+              style="letter-spacing:0.5px; font-size:11px;"
             >
               <i class="fa-solid fa-code me-1"></i>
               Skills
             </small>
-
-            <div>
-              ${skillsHTML}
-            </div>
-
+            <div>${skillsHTML}</div>
           </div>
-
         </div>
 
-
         <!-- FOOTER -->
-        <div
-          class="
-            pt-3
-            border-top
-            border-secondary
-            border-opacity-25
-            d-flex
-            justify-content-between
-            align-items-center
-          "
-        >
-
+        <div class="pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
           <small class="text-muted">
             <i class="fa-regular fa-clock me-1"></i>
-            ${escapeHTML(
-              partner.availability || "N/A"
-            )}
+            ${escapeHTML(partner.availability || "N/A")}
           </small>
-
 
           ${
             !isOwner
@@ -418,101 +440,60 @@ function createPartnerCard(partner) {
               `
               : ""
           }
-
         </div>
-
       </div>
-
     </div>
   `;
 }
+
 
 // =====================================================
 // RENDER PARTNERS
 // =====================================================
 
 function renderStudyPartners(partners) {
-  const container =
-    document.getElementById("partnersGrid");
-
-  if (!container) {
-    return;
-  }
+  const container = document.getElementById("partnersGrid");
+  if (!container) return;
 
   container.innerHTML = "";
 
   if (!partners || partners.length === 0) {
     container.innerHTML = `
-            <div class="col-12 text-center py-5">
-
-                <i
-                    class="fa-solid fa-user-slash fs-1 mb-3 text-secondary"
-                ></i>
-
-                <h5 class="text-muted">
-                    No study partners found.
-                </h5>
-
-            </div>
-        `;
-
+      <div class="col-12 text-center py-5">
+        <i class="fa-solid fa-user-slash fs-1 mb-3 text-secondary"></i>
+        <h5 class="text-muted">No study partners found.</h5>
+      </div>
+    `;
     return;
   }
 
-  const fragment =
-    document.createDocumentFragment();
+  const fragment = document.createDocumentFragment();
 
   partners.forEach(partner => {
-    const wrapper =
-      document.createElement("div");
-
-    wrapper.innerHTML =
-      createPartnerCard(partner);
-
-    fragment.appendChild(
-      wrapper.firstElementChild
-    );
+    const wrapper = document.createElement("div");
+    wrapper.innerHTML = createPartnerCard(partner);
+    fragment.appendChild(wrapper.firstElementChild);
   });
 
   container.appendChild(fragment);
 
-  container
-    .querySelectorAll(".connect-btn")
-    .forEach(button => {
-      button.addEventListener("click", () => {
-        connectPartner(
-          button.dataset.name
-        );
-      });
-    });
+  // Bind Listeners
+  container.querySelectorAll(".connect-btn").forEach(button => {
+    button.addEventListener("click", () => connectPartner(button.dataset.id, button.dataset.name));
+  });
 
-  container
-    .querySelectorAll(".edit-btn")
-    .forEach(button => {
-      button.addEventListener("click", () => {
-        editPartner(
-          button.dataset.id
-        );
-      });
-    });
+  container.querySelectorAll(".edit-btn").forEach(button => {
+    button.addEventListener("click", () => editPartner(button.dataset.id));
+  });
 
-  container
-    .querySelectorAll(".delete-btn")
-    .forEach(button => {
-      button.addEventListener("click", () => {
-        deletePartner(
-          button.dataset.id
-        );
-      });
-    });
+  container.querySelectorAll(".delete-btn").forEach(button => {
+    button.addEventListener("click", () => deletePartner(button.dataset.id));
+  });
 
   if (typeof gsap !== "undefined") {
     gsap.fromTo(
       container.querySelectorAll(".partner-card-item"),
-      {
-        y: 30,
-        opacity: 0
-      },
+      { y: 30, opacity: 0 },
       {
         y: 0,
         opacity: 1,
@@ -531,58 +512,28 @@ function renderStudyPartners(partners) {
 // =====================================================
 
 function filterPartners() {
-  const subjectInput =
-    document.getElementById("searchSubject");
+  const subjectSearch = document.getElementById("searchSubject")?.value.toLowerCase().trim() || "";
+  const skillSearch = document.getElementById("searchSkill")?.value.toLowerCase().trim() || "";
+  const levelSearch = document.getElementById("filterLevel")?.value || "";
 
-  const skillInput =
-    document.getElementById("searchSkill");
+  const filtered = allPartners.filter(partner => {
+    const subjects = safeParseArray(partner.subjects);
+    const skills = safeParseArray(partner.skills);
 
-  const levelInput =
-    document.getElementById("filterLevel");
+    const subjectMatch =
+      !subjectSearch ||
+      subjects.some(subject => String(subject).toLowerCase().includes(subjectSearch));
 
-  const subjectSearch =
-    subjectInput?.value.toLowerCase().trim() || "";
+    const skillMatch =
+      !skillSearch ||
+      skills.some(skill => String(skill).toLowerCase().includes(skillSearch));
 
-  const skillSearch =
-    skillInput?.value.toLowerCase().trim() || "";
+    const levelMatch =
+      !levelSearch ||
+      partner.experience_level === levelSearch;
 
-  const levelSearch =
-    levelInput?.value || "";
-
-  const filtered =
-    allPartners.filter(partner => {
-      const subjects =
-        safeParseArray(partner.subjects);
-
-      const skills =
-        safeParseArray(partner.skills);
-
-      const subjectMatch =
-        !subjectSearch ||
-        subjects.some(subject =>
-          String(subject)
-            .toLowerCase()
-            .includes(subjectSearch)
-        );
-
-      const skillMatch =
-        !skillSearch ||
-        skills.some(skill =>
-          String(skill)
-            .toLowerCase()
-            .includes(skillSearch)
-        );
-
-      const levelMatch =
-        !levelSearch ||
-        partner.experience_level === levelSearch;
-
-      return (
-        subjectMatch &&
-        skillMatch &&
-        levelMatch
-      );
-    });
+    return subjectMatch && skillMatch && levelMatch;
+  });
 
   renderStudyPartners(filtered);
 }
@@ -593,61 +544,38 @@ function filterPartners() {
 // =====================================================
 
 async function uploadAvatar(file) {
-  if (!file || !userid) {
-    return "";
-  }
+  if (!file || !userid) return "";
 
   if (!file.type.startsWith("image/")) {
-    throw new Error("Please select a valid image.");
+    throw new Error("Please select a valid image file.");
   }
 
   if (file.size > 5 * 1024 * 1024) {
-    throw new Error(
-      "Image size must be less than 5MB."
-    );
+    throw new Error("Image size must be less than 5MB.");
   }
 
-  const extension =
-    file.name.split(".").pop().toLowerCase();
+  const extension = file.name.split(".").pop().toLowerCase();
+  const fileName = `${userid}_${Date.now()}.${extension}`;
+  const filePath = `avatars/${fileName}`;
 
-  const fileName =
-    `${userid}_${Date.now()}.${extension}`;
-
-  const filePath =
-    `avatars/${fileName}`;
-
-  const {
-    error: uploadError
-  } = await supabase.storage
+  const { error: uploadError } = await supabase.storage
     .from("campus-assets")
-    .upload(
-      filePath,
-      file,
-      {
-        cacheControl: "3600",
-        upsert: false
-      }
-    );
+    .upload(filePath, file, {
+      cacheControl: "3600",
+      upsert: false
+    });
 
   if (uploadError) {
-    console.log(
-      "Storage Upload Error:",
-      uploadError
-    );
-
+    console.error("Storage Upload Error:", uploadError);
     throw uploadError;
   }
 
-  const {
-    data
-  } = supabase.storage
+  const { data } = supabase.storage
     .from("campus-assets")
     .getPublicUrl(filePath);
 
   if (!data?.publicUrl) {
-    throw new Error(
-      "Could not generate image URL."
-    );
+    throw new Error("Could not generate image URL.");
   }
 
   return data.publicUrl;
@@ -666,100 +594,40 @@ async function saveStudyPartner(e) {
       await showAlert({
         icon: "warning",
         title: "Login Required",
-        text: "Please login first."
+        text: "Please login first to manage your profile."
       });
-
       return;
     }
 
-    const name =
-      document.getElementById("inputName")
-        ?.value.trim();
-
-    const subjects =
-      document.getElementById("inputSubjects")
-        ?.value
-        .split(",")
-        .map(item => item.trim())
-        .filter(Boolean) || [];
-
-    const skills =
-      document.getElementById("inputSkills")
-        ?.value
-        .split(",")
-        .map(item => item.trim())
-        .filter(Boolean) || [];
-
-    const level =
-      document.getElementById("inputLevel")
-        ?.value || "";
-
-    const availability =
-      document.getElementById("inputAvailability")
-        ?.value.trim() || "";
-
-    const bio =
-      document.getElementById("inputBio")
-        ?.value.trim() || "";
-
-    const avatarInput =
-      document.getElementById("inputAvatar");
-
-    const avatarFile =
-      avatarInput?.files?.[0];
+    const name = document.getElementById("inputName")?.value.trim();
+    const subjects = document.getElementById("inputSubjects")?.value.split(",").map(i => i.trim()).filter(Boolean) || [];
+    const skills = document.getElementById("inputSkills")?.value.split(",").map(i => i.trim()).filter(Boolean) || [];
+    const level = document.getElementById("inputLevel")?.value || "";
+    const availability = document.getElementById("inputAvailability")?.value.trim() || "";
+    const bio = document.getElementById("inputBio")?.value.trim() || "";
+    const avatarFile = document.getElementById("inputAvatar")?.files?.[0];
 
     if (!name) {
-      await showAlert({
-        icon: "warning",
-        title: "Name Required",
-        text: "Please enter your full name."
-      });
-
-      return;
+      return await showAlert({ icon: "warning", title: "Name Required", text: "Please enter your full name." });
     }
-
     if (!subjects.length) {
-      await showAlert({
-        icon: "warning",
-        title: "Subject Required",
-        text: "Please enter at least one subject."
-      });
-
-      return;
+      return await showAlert({ icon: "warning", title: "Subject Required", text: "Please enter at least one subject." });
     }
-
     if (!skills.length) {
-      await showAlert({
-        icon: "warning",
-        title: "Skill Required",
-        text: "Please enter at least one skill."
-      });
-
-      return;
+      return await showAlert({ icon: "warning", title: "Skill Required", text: "Please enter at least one skill." });
     }
 
     let avatarUrl = oldAvatarUrl || "";
 
     if (avatarFile) {
       try {
-        avatarUrl =
-          await uploadAvatar(avatarFile);
-
+        avatarUrl = await uploadAvatar(avatarFile);
       } catch (error) {
-        console.log(
-          "Avatar Upload Error:",
-          error
-        );
-
-        await showAlert({
+        return await showAlert({
           icon: "error",
           title: "Image Upload Failed",
-          text:
-            error.message ||
-            "Profile picture could not be uploaded."
+          text: error.message || "Profile picture could not be uploaded."
         });
-
-        return;
       }
     }
 
@@ -770,98 +638,55 @@ async function saveStudyPartner(e) {
       skills: skills,
       experience_level: level,
       availability: availability,
-      bio: bio
+      bio: bio,
+      ...(avatarUrl && { avatar_url: avatarUrl })
     };
 
-    if (avatarUrl) {
-      profileData.avatar_url = avatarUrl;
-    }
-
-    // UPDATE
-
     if (edited && editIndex) {
-      const {
-        error
-      } = await supabase
+      const { error } = await supabase
         .from("profiles")
         .update(profileData)
         .eq("id", editIndex)
         .eq("user_id", userid);
 
       if (error) {
-        console.log(
-          "Update Error:",
-          error
-        );
-
-        await showAlert({
-          icon: "error",
-          title: "Update Failed",
-          text: error.message
-        });
-
-        return;
+        return await showAlert({ icon: "error", title: "Update Failed", text: error.message });
       }
 
       await showAlert({
         icon: "success",
         title: "Updated!",
-        text:
-          "Study partner profile updated successfully.",
+        text: "Profile updated successfully.",
         timer: 1500,
         showConfirmButton: false
       });
-    }
-
-    // INSERT
-
-    else {
-      const {
-        error
-      } = await supabase
+    } else {
+      const { error } = await supabase
         .from("profiles")
         .insert([profileData]);
 
       if (error) {
-        console.log(
-          "Insert Error:",
-          error
-        );
-
-        await showAlert({
-          icon: "error",
-          title: "Save Failed",
-          text: error.message
-        });
-
-        return;
+        return await showAlert({ icon: "error", title: "Save Failed", text: error.message });
       }
 
       await showAlert({
         icon: "success",
         title: "Saved!",
-        text:
-          "Study partner profile saved successfully.",
+        text: "Profile saved successfully.",
         timer: 1500,
         showConfirmButton: false
       });
     }
 
     resetPartnerForm();
-
     await fetchStudyPartners();
 
   } catch (error) {
-    console.log(
-      "Save Study Partner Error:",
-      error
-    );
-
+    console.error("Save Error:", error);
     await showAlert({
       icon: "error",
       title: "Error",
-      text:
-        "Something went wrong while saving your profile."
+      text: "An error occurred while processing your request."
     });
   }
 }
@@ -872,27 +697,16 @@ async function saveStudyPartner(e) {
 // =====================================================
 
 function resetPartnerForm() {
-  const form =
-    document.getElementById("partnerForm");
-
-  if (form) {
-    form.reset();
-  }
+  const form = document.getElementById("partnerForm");
+  if (form) form.reset();
 
   edited = false;
   editIndex = null;
   oldAvatarUrl = "";
 
-  const button =
-    document.querySelector(
-      "#partnerForm button[type='submit']"
-    );
-
+  const button = document.querySelector("#partnerForm button[type='submit']");
   if (button) {
-    button.innerHTML = `
-            <i class="fa-solid fa-check me-1"></i>
-            Save Profile
-        `;
+    button.innerHTML = `<i class="fa-solid fa-check me-1"></i> Save Profile`;
   }
 }
 
@@ -902,74 +716,37 @@ function resetPartnerForm() {
 // =====================================================
 
 async function editPartner(id) {
-  const partner =
-    allPartners.find(
-      item =>
-        String(item.id) === String(id)
-    );
+  const partner = allPartners.find(item => String(item.id) === String(id));
+  if (!partner) return;
 
-  if (!partner) {
-    return;
-  }
-
-  if (
-    userid !== partner.user_id &&
-    userRole !== "admin"
-  ) {
+  if (userid !== partner.user_id && userRole !== "admin") {
     await showAlert({
       icon: "error",
       title: "Access Denied",
-      text:
-        "You can only edit your own profile."
+      text: "You can only edit your own profile."
     });
-
     return;
   }
 
-  document.getElementById("inputName").value =
-    partner.full_name || "";
+  document.getElementById("inputName").value = partner.full_name || "";
+  document.getElementById("inputSubjects").value = safeParseArray(partner.subjects).join(", ");
+  document.getElementById("inputSkills").value = safeParseArray(partner.skills).join(", ");
+  document.getElementById("inputLevel").value = partner.experience_level || "";
+  document.getElementById("inputAvailability").value = partner.availability || "";
+  document.getElementById("inputBio").value = partner.bio || "";
 
-  document.getElementById("inputSubjects").value =
-    safeParseArray(partner.subjects).join(", ");
-
-  document.getElementById("inputSkills").value =
-    safeParseArray(partner.skills).join(", ");
-
-  document.getElementById("inputLevel").value =
-    partner.experience_level || "";
-
-  document.getElementById("inputAvailability").value =
-    partner.availability || "";
-
-  document.getElementById("inputBio").value =
-    partner.bio || "";
-
-  oldAvatarUrl =
-    partner.avatar_url || "";
-
+  oldAvatarUrl = partner.avatar_url || "";
   edited = true;
   editIndex = id;
 
-  const form =
-    document.getElementById("partnerForm");
-
+  const form = document.getElementById("partnerForm");
   if (form) {
-    form.scrollIntoView({
-      behavior: "smooth",
-      block: "start"
-    });
+    form.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  const button =
-    document.querySelector(
-      "#partnerForm button[type='submit']"
-    );
-
+  const button = document.querySelector("#partnerForm button[type='submit']");
   if (button) {
-    button.innerHTML = `
-            <i class="fa-solid fa-pen me-1"></i>
-            Update Profile
-        `;
+    button.innerHTML = `<i class="fa-solid fa-pen me-1"></i> Update Profile`;
   }
 }
 
@@ -979,86 +756,46 @@ async function editPartner(id) {
 // =====================================================
 
 async function deletePartner(id) {
-  const partner =
-    allPartners.find(
-      item =>
-        String(item.id) === String(id)
-    );
+  const partner = allPartners.find(item => String(item.id) === String(id));
+  if (!partner) return;
 
-  if (!partner) {
-    return;
-  }
-
-  if (
-    userid !== partner.user_id &&
-    userRole !== "admin"
-  ) {
+  if (userid !== partner.user_id && userRole !== "admin") {
     await showAlert({
       icon: "error",
       title: "Access Denied",
-      text:
-        "You can only delete your own profile."
+      text: "You can only delete your own profile."
     });
-
     return;
   }
 
-  const result =
-    await showAlert({
-      title: "Are you sure?",
-      text:
-        "This study partner profile will be deleted permanently.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText:
-        "Yes, delete it!",
-      cancelButtonText:
-        "Cancel",
-      confirmButtonColor:
-        "#ef4444"
-    });
+  const result = await showAlert({
+    title: "Are you sure?",
+    text: "This study partner profile will be deleted permanently.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Yes, delete it!",
+    cancelButtonText: "Cancel",
+    confirmButtonColor: "#ef4444"
+  });
 
-  if (!result.isConfirmed) {
-    return;
-  }
+  if (!result.isConfirmed) return;
 
-  let query =
-    supabase
-      .from("profiles")
-      .delete()
-      .eq("id", id);
-
+  let query = supabase.from("profiles").delete().eq("id", id);
   if (userRole !== "admin") {
-    query = query.eq(
-      "user_id",
-      userid
-    );
+    query = query.eq("user_id", userid);
   }
 
-  const {
-    error
-  } = await query;
+  const { error } = await query;
 
   if (error) {
-    console.log(
-      "Delete Error:",
-      error
-    );
-
-    await showAlert({
-      icon: "error",
-      title: "Delete Failed",
-      text: error.message
-    });
-
+    await showAlert({ icon: "error", title: "Delete Failed", text: error.message });
     return;
   }
 
   await showAlert({
     icon: "success",
     title: "Deleted!",
-    text:
-      "Study partner profile deleted successfully.",
+    text: "Profile deleted successfully.",
     timer: 1200,
     showConfirmButton: false
   });
@@ -1071,39 +808,42 @@ async function deletePartner(id) {
 // CONNECT PARTNER
 // =====================================================
 
-async function connectPartner(name) {
+async function connectPartner(targetUserId, name) {
   if (!userid) {
     await showAlert({
       icon: "warning",
       title: "Login Required",
-      text: "Please login first."
+      text: "Please login first to send connection requests."
     });
-
     return;
   }
 
-  const result =
-    await showAlert({
-      title: "Send Request?",
-      text:
-        `Do you want to connect with ${name}?`,
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonText:
-        "Yes, Send Request",
-      cancelButtonText:
-        "Cancel"
-    });
+  const result = await showAlert({
+    title: "Send Request?",
+    text: `Do you want to connect with ${name}?`,
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "Yes, Send Request",
+    cancelButtonText: "Cancel"
+  });
 
-  if (!result.isConfirmed) {
-    return;
+  if (!result.isConfirmed) return;
+
+  // Send Database Notification
+  if (targetUserId) {
+    await createNotification({
+      userId: targetUserId,
+      actorId: userid,
+      actorName: userName,
+      type: "connection_request",
+      message: `${userName} sent you a study partner request.`
+    });
   }
 
   await showAlert({
     icon: "success",
     title: "Request Sent!",
-    text:
-      `Connection request sent to ${name}.`,
+    text: `Connection request sent to ${name}.`,
     timer: 1500,
     showConfirmButton: false
   });
@@ -1119,21 +859,12 @@ function realTimeStudyPartners() {
     .channel("realtime-study-partners")
     .on(
       "postgres_changes",
-      {
-        event: "*",
-        schema: "public",
-        table: "profiles"
-      },
+      { event: "*", schema: "public", table: "profiles" },
       async () => {
         await fetchStudyPartners();
       }
     )
-    .subscribe(status => {
-      console.log(
-        "Study Partner Realtime:",
-        status
-      );
-    });
+    .subscribe();
 }
 
 
@@ -1142,17 +873,10 @@ function realTimeStudyPartners() {
 // =====================================================
 
 async function logout() {
-  const {
-    error
-  } = await supabase.auth.signOut();
+  const { error } = await supabase.auth.signOut();
 
   if (error) {
-    await showAlert({
-      icon: "error",
-      title: "Logout Failed",
-      text: error.message
-    });
-
+    await showAlert({ icon: "error", title: "Logout Failed", text: error.message });
     return;
   }
 
@@ -1163,183 +887,152 @@ async function logout() {
     showConfirmButton: false
   });
 
-  window.location.href =
-    "index.html";
+  window.location.href = "index.html";
 }
 
 
 // =====================================================
-// THEME
+// THEME MANAGEMENT
 // =====================================================
 
 function applyTheme(theme) {
-  document.documentElement.setAttribute(
-    "data-theme",
-    theme
-  );
+  document.documentElement.setAttribute("data-theme", theme);
+  document.body.setAttribute("data-theme", theme);
+  localStorage.setItem("theme", theme);
 
-  document.body.setAttribute(
-    "data-theme",
-    theme
-  );
-
-  localStorage.setItem(
-    "theme",
-    theme
-  );
-
-  const toggle =
-    document.getElementById(
-      "theme-toggle"
-    );
-
-  if (toggle) {
-    toggle.checked =
-      theme === "dark";
-  }
-
-  const emailElements =
-    document.querySelectorAll(
-      ".email-text-element"
-    );
-
-  emailElements.forEach(element => {
-    element.style.setProperty(
+  const toggle = document.getElementById("theme-toggle");
+  if (toggle) toggle.checked = theme === "dark";
+  const navUserText = document.querySelectorAll("#navUserName, .user-name, #profileDropdownBtn span");
+  navUserText.forEach(text => {
+    text.style.setProperty(
       "color",
-      theme === "dark"
-        ? "#cbd5e1"
-        : "#475569",
-      "important"
-    );
-  });
-
-  const headings =
-    document.querySelectorAll(
-      ".heading, .page-title, .hero-title, h1, h2, h3"
-    );
-
-  headings.forEach(element => {
-    element.style.setProperty(
-      "color",
-      theme === "dark"
-        ? "#f8fafc"
-        : "#0f172a",
+      theme === "dark" ? "#ffffff" : "#0f172a",
       "important"
     );
   });
 }
 
-
 function initTheme() {
-  const stored =
-    localStorage.getItem("theme");
-
-  const prefersDark =
-    window.matchMedia &&
-    window.matchMedia(
-      "(prefers-color-scheme: dark)"
-    ).matches;
-
-  const theme =
-    stored ||
-    (prefersDark
-      ? "dark"
-      : "light");
+  const stored = localStorage.getItem("theme");
+  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const theme = stored || (prefersDark ? "dark" : "light");
 
   applyTheme(theme);
 
-  const toggle =
-    document.getElementById(
-      "theme-toggle"
-    );
-
+  const toggle = document.getElementById("theme-toggle");
   if (toggle) {
-    toggle.addEventListener(
-      "change",
-      e => {
-        applyTheme(
-          e.target.checked
-            ? "dark"
-            : "light"
-        );
-      }
-    );
+    toggle.addEventListener("change", e => {
+      applyTheme(e.target.checked ? "dark" : "light");
+    });
   }
 }
 
 
 // =====================================================
-// GSAP
+// GSAP ANIMATIONS
 // =====================================================
 
 function initAnimations() {
-  if (typeof gsap === "undefined") {
-    return;
-  }
+  if (typeof gsap === "undefined") return;
 
-  let pointer =
-    document.getElementById("pointer");
-
+  let pointer = document.getElementById("pointer");
   if (!pointer) {
-    pointer =
-      document.createElement("div");
-
+    pointer = document.createElement("div");
     pointer.id = "pointer";
-
     document.body.appendChild(pointer);
   }
 
-  gsap.set(pointer, {
-    xPercent: -50,
-    yPercent: -50
+  gsap.set(pointer, { xPercent: -50, yPercent: -50 });
+
+  window.addEventListener("mousemove", e => {
+    gsap.to(pointer, {
+      x: e.clientX,
+      y: e.clientY,
+      duration: 0.12,
+      ease: "power2.out"
+    });
   });
 
-  window.addEventListener(
-    "mousemove",
-    e => {
-      gsap.to(pointer, {
-        x: e.clientX,
-        y: e.clientY,
-        duration: 0.12,
-        ease: "power2.out",
-        boxShadow:
-          "0 0 25px rgba(16,185,129,1)"
-      });
-    }
-  );
+  const tl = gsap.timeline({
+    defaults: { ease: "power3.out", duration: 0.8, clearProps: "all" }
+  });
 
-  const tl =
-    gsap.timeline({
-      defaults: {
-        ease: "power3.out",
-        duration: 0.8,
-        clearProps: "all"
-      }
+  tl.from("nav, .navbar, .custom-navbar", { y: -50, opacity: 0 })
+    .from(".studypartner-card-form, .col-lg-4", { x: -50, opacity: 0 }, "-=0.4")
+    .from(".filter-card", { y: -20, opacity: 0 }, "-=0.3");
+}
+
+
+// =====================================================
+// NOTIFICATION SYSTEM UI
+// =====================================================
+
+export async function initNotificationSystem(currentUserId) {
+  if (!currentUserId) return;
+
+  const notifBtn = document.getElementById("notifBtn");
+  const notifMenu = document.getElementById("notifMenu");
+  const notifBadge = document.getElementById("notifBadge");
+  const notifListContainer = document.getElementById("notifListContainer");
+
+  // Dropdown Toggle
+  if (notifBtn && notifMenu) {
+    notifBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isHidden = notifMenu.style.display === "none" || notifMenu.style.display === "";
+      notifMenu.style.display = isHidden ? "block" : "none";
     });
 
-  tl.from(
-    "nav, .navbar, .custom-navbar",
-    {
-      y: -50,
-      opacity: 0
+    window.addEventListener("click", (e) => {
+      if (!notifMenu.contains(e.target) && !notifBtn.contains(e.target)) {
+        notifMenu.style.display = "none";
+      }
+    });
+  }
+
+  // Load Function
+  async function loadUI() {
+    const notifications = await fetchNotifications(currentUserId);
+    const unreadCount = notifications.filter(n => !n.is_read).length;
+
+    // Badge Update
+    if (notifBadge) {
+      if (unreadCount > 0) {
+        notifBadge.innerText = unreadCount;
+        notifBadge.classList.remove("d-none");
+      } else {
+        notifBadge.classList.add("d-none");
+      }
     }
-  )
-    .from(
-      ".studypartner-card-form, .col-lg-4",
-      {
-        x: -50,
-        opacity: 0
-      },
-      "-=0.4"
-    )
-    .from(
-      ".filter-card",
-      {
-        y: -20,
-        opacity: 0
-      },
-      "-=0.3"
-    );
+
+    // List Update
+    if (notifListContainer) {
+      if (notifications.length === 0) {
+        notifListContainer.innerHTML = `<p class="text-muted small text-center my-2">No notifications</p>`;
+        return;
+      }
+
+      notifListContainer.innerHTML = notifications.map(n => `
+        <div class="p-2 mb-1 rounded cursor-pointer notif-item ${n.is_read ? 'opacity-50' : 'bg-dark'}" 
+             data-id="${n.id}" style="border-left: 3px solid #00dfa2;">
+          <p class="small text-light mb-0">${n.message}</p>
+          <small class="text-muted extra-small">${new Date(n.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</small>
+        </div>
+      `).join("");
+
+      // Read Event
+      notifListContainer.querySelectorAll(".notif-item").forEach(item => {
+        item.addEventListener("click", async () => {
+          await markAsRead(item.dataset.id);
+          loadUI();
+        });
+      });
+    }
+  }
+
+  // Initial Load & Realtime Listener
+  await loadUI();
+  listenForNotifications(currentUserId, () => loadUI());
 }
 
 
@@ -1347,63 +1040,34 @@ function initAnimations() {
 // INITIALIZATION
 // =====================================================
 
-document.addEventListener(
-  "DOMContentLoaded",
-  async function () {
+document.addEventListener("DOMContentLoaded", async function () {
+  initTheme();
+  initProfileDropdown();
+  const currentUser = await getCurrentUser();
 
-    initTheme();
-
-    await getCurrentUser();
-
-    const form =
-      document.getElementById(
-        "partnerForm"
-      );
-
-    if (form) {
-      form.addEventListener(
-        "submit",
-        saveStudyPartner
-      );
-    }
-
-    const searchSubject =
-      document.getElementById(
-        "searchSubject"
-      );
-
-    const searchSkill =
-      document.getElementById(
-        "searchSkill"
-      );
-
-    const filterLevel =
-      document.getElementById(
-        "filterLevel"
-      );
-
-    searchSubject?.addEventListener(
-      "input",
-      filterPartners
-    );
-
-    searchSkill?.addEventListener(
-      "input",
-      filterPartners
-    );
-
-    filterLevel?.addEventListener(
-      "change",
-      filterPartners
-    );
-
-    await fetchStudyPartners();
-
-    realTimeStudyPartners();
-
-    initAnimations();
+  if (currentUser) {
+    await initNotificationSystem(currentUser.id);
   }
-);
+
+  const form = document.getElementById("partnerForm");
+  if (form) {
+    form.addEventListener("submit", saveStudyPartner);
+  }
+
+  const searchSubject = document.getElementById("searchSubject");
+  const searchSkill = document.getElementById("searchSkill");
+  const filterLevel = document.getElementById("filterLevel");
+
+  searchSubject?.addEventListener("input", filterPartners);
+  searchSkill?.addEventListener("input", filterPartners);
+  filterLevel?.addEventListener("change", filterPartners);
+
+  await fetchStudyPartners();
+  realTimeStudyPartners();
+  initAnimations();
+});
+
+// Window Exports
 window.logout = logout;
 window.connectPartner = connectPartner;
 window.editPartner = editPartner;

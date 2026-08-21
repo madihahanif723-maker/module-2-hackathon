@@ -1,4 +1,80 @@
 import supabase from "../supabase.js";
+import { 
+  fetchNotifications, 
+  markAsRead, 
+  listenForNotifications, 
+  createNotification 
+} from "./notification.js";
+
+// ==========================================
+// NOTIFICATION SYSTEM INITIALIZER
+// ==========================================
+export async function initNotificationSystem(currentUserId) {
+  if (!currentUserId) return;
+
+  const notifBtn = document.getElementById("notifBtn");
+  const notifMenu = document.getElementById("notifMenu");
+  const notifBadge = document.getElementById("notifBadge");
+  const notifListContainer = document.getElementById("notifListContainer");
+
+  // Toggle Dropdown Menu
+  if (notifBtn && notifMenu) {
+    notifBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isHidden = notifMenu.style.display === "none" || notifMenu.style.display === "";
+      notifMenu.style.display = isHidden ? "block" : "none";
+    });
+
+    window.addEventListener("click", (e) => {
+      if (!notifMenu.contains(e.target) && !notifBtn.contains(e.target)) {
+        notifMenu.style.display = "none";
+      }
+    });
+  }
+
+  // Load and Render Notifications
+  async function loadUI() {
+    const notifications = await fetchNotifications(currentUserId);
+    const unreadCount = notifications.filter((n) => !n.is_read).length;
+
+    if (notifBadge) {
+      if (unreadCount > 0) {
+        notifBadge.innerText = unreadCount;
+        notifBadge.classList.remove("d-none");
+      } else {
+        notifBadge.classList.add("d-none");
+      }
+    }
+
+    if (notifListContainer) {
+      if (notifications.length === 0) {
+        notifListContainer.innerHTML = `<p class="text-muted small text-center my-2">No notifications yet.</p>`;
+        return;
+      }
+
+      notifListContainer.innerHTML = notifications.map((n) => `
+        <div class="p-2 mb-1 rounded cursor-pointer notif-item ${n.is_read ? 'opacity-50' : 'bg-dark'}" 
+             data-id="${n.id}" style="border-left: 3px solid #00dfa2;">
+          <p class="small text-light mb-0" style="font-size:12px;">${n.message}</p>
+          <small class="text-muted" style="font-size:10px;">${new Date(n.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
+        </div>
+      `).join("");
+
+      // Mark as read on click
+      notifListContainer.querySelectorAll(".notif-item").forEach((item) => {
+        item.addEventListener("click", async () => {
+          await markAsRead(item.dataset.id);
+          loadUI();
+        });
+      });
+    }
+  }
+
+  await loadUI();
+  
+  // Realtime updates listener
+  listenForNotifications(currentUserId, () => loadUI());
+}
 
 let userId = null;
 let currentFilter = "all";
@@ -21,6 +97,24 @@ function applyTheme(theme) {
     emailElements.forEach(el => {
         el.style.setProperty('color', (theme === "dark" ? "#cbd5e1" : "#475569"), 'important');
     });
+
+    const navUserText = document.querySelectorAll("#navUserName, .user-name, #profileDropdownBtn span");
+    navUserText.forEach(text => {
+        text.style.setProperty(
+            "color",
+            theme === "dark" ? "#ffffff" : "#0f172a",
+            "important"
+        );
+    });
+
+    const notifBtn = document.getElementById("notifDropdown") || document.getElementById("notifBtn");
+    if (notifBtn) {
+        notifBtn.style.setProperty(
+            "color",
+            theme === "dark" ? "#ffffff" : "#0f172a",
+            "important"
+        );
+    }
 }
 
 function initTheme() {
@@ -37,7 +131,6 @@ function initProfileDropdown() {
     const profilePicInput = document.getElementById('profilePicInput');
     const logoutBtn = document.getElementById('logoutBtn');
 
-    // 1. Toggle Dropdown Open / Close via .show Class
     if (profileDropdownBtn && profileMenu) {
         profileDropdownBtn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -51,7 +144,6 @@ function initProfileDropdown() {
         });
     }
 
-    // 2. Profile Picture Upload Trigger
     if (uploadPicBtn && profilePicInput) {
         uploadPicBtn.addEventListener('click', () => {
             profilePicInput.click();
@@ -59,7 +151,6 @@ function initProfileDropdown() {
         profilePicInput.addEventListener('change', uploadProfilePicture);
     }
 
-    // 3. Logout Action
     if (logoutBtn) {
         logoutBtn.addEventListener('click', logout);
     }
@@ -126,26 +217,22 @@ async function uploadProfilePicture(e) {
         const fileExt = file.name.split('.').pop();
         const filePath = `avatars/${userId}-${Date.now()}.${fileExt}`;
 
-        // Upload to Storage Bucket
         const { error: uploadError } = await supabase.storage
             .from("avatars")
             .upload(filePath, file, { upsert: true });
 
         if (uploadError) throw uploadError;
 
-        // Get Public URL
         const { data: publicUrlData } = supabase.storage
             .from("avatars")
             .getPublicUrl(filePath);
 
         const publicUrl = publicUrlData.publicUrl;
 
-        // Save URL in database
         await supabase
             .from("profiles")
             .upsert({ id: userId, avatar_url: publicUrl, updated_at: new Date() });
 
-        // Update UI Elements
         const userAvatarImg = document.getElementById("userAvatarImg");
         const userInitialText = document.getElementById("userInitialText") || document.getElementById("char") || document.getElementById("userAvatarText");
 
@@ -193,14 +280,12 @@ async function logout() {
 // 3. EVENTS SYSTEM LOGIC
 // ==========================================
 
-// Fetch User & Initialize
 async function checkUserSession() {
     try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
             userId = user.id;
 
-            // Fetch dynamic display name
             let displayName = "";
             const { data: profile } = await supabase
                 .from("profiles")
@@ -223,7 +308,6 @@ async function checkUserSession() {
 
             const firstLetter = displayName.charAt(0).toUpperCase();
 
-            // Set text elements safely
             const navUserName = document.getElementById("navUserName");
             const userAvatarText = document.getElementById("char") || document.getElementById("userAvatarText") || document.getElementById("userInitialText");
             const userEmailText = document.getElementById("dropdownEmail") || document.getElementById("userEmailText");
@@ -232,8 +316,10 @@ async function checkUserSession() {
             if (userAvatarText) userAvatarText.innerText = firstLetter;
             if (userEmailText) userEmailText.innerText = user.email;
 
-            // Load user profile picture
             await loadUserProfileImage(userId);
+            
+            // Initialize Notification System for authenticated user
+            await initNotificationSystem(userId);
         } else {
             window.location.href = "index.html";
         }
@@ -242,7 +328,6 @@ async function checkUserSession() {
     }
 }
 
-// Fetch & Render Events Card List
 async function fetchAndRenderEvents() {
     const eventsContainer = document.getElementById("eventsContainer");
     if (!eventsContainer) return;
@@ -259,7 +344,6 @@ async function fetchAndRenderEvents() {
         const { data: events, error } = await query;
         if (error) throw error;
 
-        // Fetch participants data
         const { data: participants } = await supabase.from("event_participants").select("*");
 
         const participantCounts = {};
@@ -301,19 +385,18 @@ async function fetchAndRenderEvents() {
     }
 }
 
-// Event Card HTML Generation
 function createEventCard(event, count, isJoined) {
     const banner = event.image_url || 'https://via.placeholder.com/600x200?text=Event+Banner';
 
     return `
-    <div class="card mb-4 bg-dark text-white border-secondary">
+    <div class="card mb-4 event-card border-0 shadow-sm">
         <img src="${banner}" class="card-img-top" style="max-height: 200px; object-fit: cover;" alt="Event Banner">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-start">
-                <h4 class="card-title text-success">${event.title}</h4>
+                <h4 class="card-title text-success fw-bold">${event.title}</h4>
                 <span class="badge bg-secondary"><i class="bi bi-people-fill"></i> ${count} Attending</span>
             </div>
-            <p class="card-text text-light mt-2">${event.description}</p>
+            <p class="card-text mt-2">${event.description}</p>
             <div class="d-flex gap-3 text-info small mb-3">
                 <span><i class="bi bi-calendar"></i> ${event.event_date || ''}</span>
                 <span><i class="bi bi-clock"></i> ${event.event_time || ''}</span>
@@ -322,8 +405,8 @@ function createEventCard(event, count, isJoined) {
             
             <div class="d-flex justify-content-between align-items-center">
                 ${isJoined ?
-            `<button class="btn btn-outline-danger btn-sm" onclick="toggleJoin('${event.id}', true)">Cancel Registration</button>` :
-            `<button class="btn btn-success btn-sm" onclick="toggleJoin('${event.id}', false)">Join Event</button>`
+            `<button class="btn btn-outline-danger btn-sm" onclick="toggleJoin('${event.id}', true, '${event.title.replace(/'/g, "\\'")}')">Cancel Registration</button>` :
+            `<button class="btn btn-success btn-sm" onclick="toggleJoin('${event.id}', false, '${event.title.replace(/'/g, "\\'")}')">Join Event</button>`
         }
                 ${userId === event.user_id ?
             `<button class="btn btn-sm text-danger" onclick="deleteEvent('${event.id}')"><i class="bi bi-trash"></i></button>` : ''
@@ -333,7 +416,6 @@ function createEventCard(event, count, isJoined) {
     </div>`;
 }
 
-// Create & Publish Event Function
 async function createEvent(e) {
     if (e && e.preventDefault) e.preventDefault();
 
@@ -391,6 +473,9 @@ async function createEvent(e) {
 
         if (error) throw error;
 
+        // Trigger Notification for Event Creation
+        await createNotification(userId, `🎉 Event "${title}" created successfully!`);
+
         if (typeof Swal !== "undefined") {
             Swal.fire("Success", "Event Created Successfully!", "success");
         } else {
@@ -412,8 +497,7 @@ async function createEvent(e) {
     }
 }
 
-// Join / Cancel Registration Toggle
-async function toggleJoin(eventId, isJoined) {
+async function toggleJoin(eventId, isJoined, eventTitle = "Event") {
     if (!userId) {
         alert("Please login first to join events!");
         return;
@@ -422,8 +506,12 @@ async function toggleJoin(eventId, isJoined) {
     try {
         if (isJoined) {
             await supabase.from("event_participants").delete().eq("event_id", eventId).eq("user_id", userId);
+            // Trigger Notification for Unjoining
+            await createNotification(userId, `❌ You cancelled registration for "${eventTitle}".`);
         } else {
             await supabase.from("event_participants").insert([{ event_id: eventId, user_id: userId }]);
+            // Trigger Notification for Joining
+            await createNotification(userId, `🗓️ You successfully joined "${eventTitle}"!`);
         }
         await fetchAndRenderEvents();
     } catch (err) {
@@ -431,7 +519,6 @@ async function toggleJoin(eventId, isJoined) {
     }
 }
 
-// Delete Event Function
 async function deleteEvent(eventId) {
     if (confirm("Are you sure you want to delete this event?")) {
         await supabase.from("events").delete().eq("id", eventId);
@@ -439,7 +526,6 @@ async function deleteEvent(eventId) {
     }
 }
 
-// Real-time Listeners Setup
 function setupRealtime() {
     supabase.channel('events-realtime-channel')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, () => fetchAndRenderEvents())
@@ -480,13 +566,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    const createForm = document.getElementById("createEventForm") || document.querySelector("form");
+    if (createForm) {
+        createForm.addEventListener("submit", createEvent);
+    }
+
     const publishBtn = document.getElementById("eventBtn") || document.getElementById("publishEventBtn");
     if (publishBtn) {
         publishBtn.addEventListener("click", createEvent);
     }
 });
 
-// Window Exports
+// Window Exports (Required for HTML onclicks inside Modules)
 window.createEvent = createEvent;
 window.toggleJoin = toggleJoin;
 window.deleteEvent = deleteEvent;

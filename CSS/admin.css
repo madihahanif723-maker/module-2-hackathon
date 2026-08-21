@@ -860,3 +860,52 @@ body:has(button:hover, a:hover, input:hover, .nav-link:hover) #pointer {
 .swal2-cancel:hover {
     background-color: #475569 !important;
 }
+/* Custom Input Styling for Dark Theme */
+.custom-input {
+    background-color: #15222e !important;
+    border: 1px solid #2a3b4c !important;
+    color: #ffffff !important;
+    border-radius: 8px;
+    padding: 10px 14px;
+}
+
+.custom-input::placeholder {
+    color: #8b9bb4 !important;
+}
+
+.custom-input:focus {
+    border-color: #00DFA2 !important;
+    box-shadow: 0 0 10px rgba(0, 223, 162, 0.25) !important;
+    outline: none;
+}
+
+/* Emerald Accent Button */
+.btn-emerald {
+    background-color: #00DFA2 !important;
+    color: #080F1F !important;
+    border: none;
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-emerald:hover {
+    background-color: #00b885 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 12px rgba(0, 223, 162, 0.4);
+}
+/* Emerald Theme Button Styling */
+.btn-emerald {
+    background-color: #00DFA2 !important;
+    color: #080F1F !important;
+    border: none !important;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease-in-out;
+}
+
+.btn-emerald:hover {
+    background-color: #00b885 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 15px rgba(0, 223, 162, 0.4);
+    transform: translateY(-1px);
+}

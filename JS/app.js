@@ -1,3 +1,5 @@
+
+
 import supabase from "../supabase.js";
 
 let edited = false;
@@ -7,28 +9,181 @@ var title = document.getElementById("title");
 var description = document.getElementById("description");
 let editIndex = null;
 let userName = "";
-let userid;
-let Email;
-let userRole;
+let userid = null;
+let Email = "";
+let userRole = "";
 
-// 1. Popup menu toggle
-window.toggleProfileMenu = function () {
-    const popup = document.getElementById("profilePopup");
-    if (popup) {
-        popup.classList.toggle("show");
+function initProfileDropdown() {
+    const profileDropdownBtn = document.getElementById('profileDropdownBtn') || document.getElementById('avatarBtn');
+    const profileMenu = document.getElementById('profileMenu') || document.getElementById('profilePopup');
+    const uploadPicBtn = document.getElementById('uploadPicBtn');
+    const profilePicInput = document.getElementById('profilePicInput');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    if (profileDropdownBtn && profileMenu) {
+        profileDropdownBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            profileMenu.classList.toggle("show");
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!profileMenu.contains(e.target) && !profileDropdownBtn.contains(e.target)) {
+                profileMenu.classList.remove("show");
+            }
+        });
     }
-};
 
-// Close dropdown on clicking outside
-window.addEventListener("click", function (e) {
-    const dropdown = document.querySelector(".profile-dropdown");
-    const popup = document.getElementById("profilePopup");
-    if (dropdown && popup && !dropdown.contains(e.target)) {
-        popup.classList.remove("show");
+    if (uploadPicBtn && profilePicInput) {
+        uploadPicBtn.addEventListener('click', () => {
+            profilePicInput.click();
+        });
+        profilePicInput.addEventListener('change', uploadProfilePicture);
     }
-});
 
-// Fetch initial like counts for all posts
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', logout);
+    }
+}
+
+async function loadUserProfileImage(uId) {
+    try {
+        const userAvatarImg = document.getElementById("userAvatarImg");
+        const userInitialText = document.getElementById("userInitialText") || document.getElementById("char") || document.getElementById("userAvatarText");
+
+        const { data: profile } = await supabase
+            .from("profiles")
+            .select("avatar_url")
+            .eq("id", uId)
+            .maybeSingle();
+
+        if (profile && profile.avatar_url) {
+            if (userAvatarImg) {
+                userAvatarImg.src = profile.avatar_url;
+                userAvatarImg.classList.remove("d-none");
+            }
+            if (userInitialText) userInitialText.classList.add("d-none");
+        }
+    } catch (err) {
+        console.error("Error fetching avatar:", err);
+    }
+}
+
+async function uploadProfilePicture(e) {
+    const file = e.target.files[0];
+    if (!file || !userid) return;
+
+    try {
+        if (typeof Swal !== "undefined") {
+            Swal.fire({ title: 'Uploading...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        }
+
+        const fileExt = file.name.split('.').pop();
+        const filePath = `avatars/${userid}-${Date.now()}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+            .from("avatars")
+            .upload(filePath, file, { upsert: true });
+
+        if (uploadError) throw uploadError;
+
+        const { data: publicUrlData } = supabase.storage
+            .from("avatars")
+            .getPublicUrl(filePath);
+
+        const publicUrl = publicUrlData.publicUrl;
+
+        await supabase
+            .from("profiles")
+            .upsert({ id: userid, avatar_url: publicUrl, updated_at: new Date() });
+
+        const userAvatarImg = document.getElementById("userAvatarImg");
+        const userInitialText = document.getElementById("userInitialText") || document.getElementById("char") || document.getElementById("userAvatarText");
+
+        if (userAvatarImg) {
+            userAvatarImg.src = publicUrl;
+            userAvatarImg.classList.remove("d-none");
+        }
+        if (userInitialText) userInitialText.classList.add("d-none");
+
+        if (typeof Swal !== "undefined") {
+            Swal.fire({ icon: 'success', title: 'Profile Picture Updated!', timer: 1500, showConfirmButton: false });
+        } else {
+            alert("Profile Picture Updated!");
+        }
+
+    } catch (err) {
+        console.error("Upload Error:", err);
+        if (typeof Swal !== "undefined") {
+            Swal.fire("Upload Failed", err.message || "Could not upload image.", "error");
+        } else {
+            alert("Upload failed: " + err.message);
+        }
+    }
+}
+
+async function logout() {
+    if (supabase) {
+        await supabase.auth.signOut();
+    }
+    if (typeof Swal !== "undefined") {
+        Swal.fire({
+            icon: 'success',
+            title: 'Logged Out',
+            timer: 1200,
+            showConfirmButton: false
+        }).then(() => {
+            window.location.href = "index.html";
+        });
+    } else {
+        window.location.href = "index.html";
+    }
+}
+
+async function checkUserSession() {
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+            userid = user.id;
+
+            let displayName = "";
+            const { data: profile } = await supabase
+                .from("profiles")
+                .select("full_name, name")
+                .eq("id", user.id)
+                .maybeSingle();
+
+            if (profile && (profile.full_name || profile.name)) {
+                displayName = profile.full_name || profile.name;
+            } else if (user.user_metadata) {
+                displayName = user.user_metadata.full_name || user.user_metadata.name || `${user.user_metadata.first_name || ""} ${user.user_metadata.last_name || ""}`.trim();
+            }
+
+            if (!displayName && user.email) {
+                const prefix = user.email.split("@")[0];
+                displayName = prefix.charAt(0).toUpperCase() + prefix.slice(1);
+            }
+
+            if (!displayName) displayName = "User";
+
+            const firstLetter = displayName.charAt(0).toUpperCase();
+
+            const navUserName = document.getElementById("navUserName");
+            const userAvatarText = document.getElementById("char") || document.getElementById("userAvatarText") || document.getElementById("userInitialText");
+            const userEmailText = document.getElementById("dropdownEmail") || document.getElementById("userEmailText");
+
+            if (navUserName) navUserName.innerText = displayName;
+            if (userAvatarText) userAvatarText.innerText = firstLetter;
+            if (userEmailText) userEmailText.innerText = user.email;
+
+            await loadUserProfileImage(userid);
+        } else {
+            window.location.href = "index.html";
+        }
+    } catch (err) {
+        console.log("Auth session error:", err);
+    }
+}
+
 async function fetchLikeCounts() {
     try {
         const { data, error } = await supabase.from("like_table").select("post_id");
@@ -39,7 +194,6 @@ async function fetchLikeCounts() {
             counts[like.post_id] = (counts[like.post_id] || 0) + 1;
         });
 
-        // Set all to 0 first, then populate actual counts
         document.querySelectorAll("[id^='like-']").forEach(el => el.innerText = "0");
 
         Object.keys(counts).forEach(postId => {
@@ -51,10 +205,8 @@ async function fetchLikeCounts() {
     }
 }
 
-// Search Posts
 async function searchPosts() {
     let searchInput = document.getElementById("searchInput")?.value || "";
-    console.log("Searching for:", searchInput);
     try {
         const { data, error } = await supabase
             .from("post_app_table")
@@ -70,7 +222,7 @@ async function searchPosts() {
             console.log("Error searching posts:", error);
             return;
         }
-        postsContainer.innerHTML = "";
+
         if (!data || data.length === 0) {
             postsContainer.innerHTML = `
         <div class="empty-state-card p-5 text-center my-3 shadow-sm">
@@ -78,27 +230,16 @@ async function searchPosts() {
             <h5 class="fw-bold mb-2 empty-title">No Posts Found</h5>
             <p class="mb-0 empty-text">We couldn't find anything matching "<strong>${searchInput}</strong>". Try searching for something else!</p>
         </div>
-         `;
+        `;
             return;
         }
         data.forEach(post => { postsContainer.innerHTML += createPostCard(post); });
-
         await fetchLikeCounts();
-
-        // if (!data.length) {
-        //     Swal.fire({
-        //         icon: "info",
-        //         title: "No Results",
-        //         text: "No posts found matching your search."
-        //     });
-        //     postsContainer.innerHTML = "<p class='text-center no-comment-text'>No posts found.</p>";
-        // }
     } catch (error) {
         console.log("Error searching posts:", error);
     }
 }
 
-// Generate Post HTML
 function createPostCard(post) {
     let currentTextColor = post.text_color || "#ffffff";
     let displayUserName = post.user_name || "Anonymous";
@@ -150,7 +291,6 @@ function createPostCard(post) {
             <div id="comments-list-${post.id}" class="mb-3 overflow-y-auto" style="max-height: 150px;"></div>
             
             <div class="input-group">
-                <!-- Theme adapt input box -->
                 <input type="text" id="comment-input-${post.id}" class="form-control comment-input-field" placeholder="Write a comment..." style="font-size: 14px; padding: 10px;">
                 <button class="btn px-4 fw-bold text-white" style="background-color: #14b8a6; border: none; transition: 0.2s;" onmouseover="this.style.backgroundColor='#0d9488'" onmouseout="this.style.backgroundColor='#14b8a6'" onclick="addComment(${post.id})">Send</button>
             </div>
@@ -160,15 +300,19 @@ function createPostCard(post) {
 `;
 }
 
-// Onload setup
 window.onload = async function () {
+    initProfileDropdown();
+    await checkUserSession();
+
+    const savedTheme = localStorage.getItem("theme") || "dark";
+    applyTheme(savedTheme);
+
     const postsContainer = document.getElementById("posts");
     const imgInput = document.getElementById("imgInput");
     if (imgInput) {
         imgInput.addEventListener("change", previewFile);
     }
 
-    // Auth System
     try {
         const { data: { user }, error } = await supabase.auth.getUser();
         if (user) {
@@ -193,8 +337,6 @@ window.onload = async function () {
             if (adminBtn) {
                 adminBtn.classList.remove("d-none");
             }
-        } else {
-            console.log("No active session found.");
         }
 
         if (error) console.log("Auth Error:", error);
@@ -202,7 +344,6 @@ window.onload = async function () {
         console.log("User load error:", error);
     }
 
-    // Fetch initial posts list
     try {
         const { data, error } = await supabase
             .from('post_app_table')
@@ -226,8 +367,6 @@ window.onload = async function () {
         }
 
         await fetchLikeCounts();
-
-        // Initialize Real-time Subscriptions ONCE
         realTimePost();
         realTimeLikes();
         realTimeComments();
@@ -341,6 +480,7 @@ async function fetchComments(postId) {
         console.log("Error fetching comments:", err);
     }
 }
+
 async function editComment(commentId, oldText, postId) {
     if (!userid) {
         Swal.fire("Error", "Please login first", "error");
@@ -388,8 +528,7 @@ async function editComment(commentId, oldText, postId) {
         }
     }
 }
-// Window bindings me add karein
-window.editComment = editComment;
+
 async function deleteComment(commentId, commentUserId, postId) {
     if (!userid) {
         Swal.fire("Error", "Please login first", "error");
@@ -561,7 +700,6 @@ async function post() {
     }
 }
 
-// Global Real-time Subscription (Subscribed once)
 function realTimePost() {
     supabase
         .channel('realtime-post')
@@ -652,13 +790,13 @@ function realTimeComments() {
         });
 }
 
-async function editPost(event, id, desc, titleVal, bg_img, textColor, currentTextColor, userId) {
+async function editPost(event, id, desc, titleVal, bg_img, textColor, currentTextColor, UserId) {
     if (!userid) {
         Swal.fire({ icon: "error", title: "Login Required", text: "Please login first." });
         return;
     }
 
-    if (userid !== userId && userRole !== 'admin') {
+    if (userid !== UserId && userRole !== 'admin') {
         Swal.fire({ icon: "error", title: "Access Denied", text: "You can only edit your own post." });
         return;
     }
@@ -674,22 +812,6 @@ async function editPost(event, id, desc, titleVal, bg_img, textColor, currentTex
     editIndex = id;
     let postBtn = document.getElementById("postBtn");
     if (postBtn) postBtn.innerHTML = "Update Post";
-}
-
-async function logout() {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-        Swal.fire('Error', error.message, 'error');
-        return;
-    }
-    Swal.fire({
-        icon: 'success',
-        title: 'Logged Out',
-        timer: 1200,
-        showConfirmButton: false
-    }).then(() => {
-        window.location.href = 'index.html';
-    });
 }
 
 function previewFile(e) {
@@ -768,123 +890,77 @@ function applycolor(element) {
         colorbox[i].classList.remove('selected');
     }
     element.classList.add('selected');
-    selectedTextColor = element.style.backgroundColor;
+    selectedTextColor = element.getAttribute("data-color") || element.style.backgroundColor || window.getComputedStyle(element).backgroundColor || "#ffffff";
 }
 
+// Theme Apply Function
 function applyTheme(theme) {
     document.documentElement.setAttribute("data-theme", theme);
     document.body.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
 
-    // Sync Checkbox Pill Switch State
     const themeToggleBtn = document.getElementById('theme-toggle');
     if (themeToggleBtn) {
         themeToggleBtn.checked = (theme === "dark");
     }
 
-    // Sync Old Theme Icon (if used somewhere)
     const icon = document.getElementById("themeIcon");
     if (icon) {
-        icon.className = theme === "dark" ? "bi bi-sun-fill" : "bi bi-moon-fill";
-        icon.style.setProperty('color', '#ffffff', 'important');
+        icon.className = theme === "dark" ? "bi bi-moon-stars-fill" : "bi bi-sun-fill";
     }
 
-    const emailElements = document.querySelectorAll('.email-text-element');
-    emailElements.forEach(el => {
-        el.style.setProperty('color', (theme === "dark" ? "#cbd5e1" : "#475569"), 'important');
+    // Dynamic Post Card Email Color Update
+    document.querySelectorAll(".email-text-element").forEach(el => {
+        el.style.color = (theme === "dark") ? "#cbd5e1" : "#475569";
     });
 }
 
-// Toggle Function
+// Global Toggle Handler (HTML onclick ya change event ke liye)
 function toggleTheme() {
-    const currentTheme = document.documentElement.getAttribute("data-theme");
+    const currentTheme = localStorage.getItem("theme") || "dark";
     const newTheme = currentTheme === "dark" ? "light" : "dark";
-
-    document.documentElement.setAttribute("data-theme", newTheme);
-    document.body.classList.toggle("dark-mode", newTheme === "dark");
-    localStorage.setItem("theme", newTheme);
+    applyTheme(newTheme);
 }
 
-// Checkbox Event Handling safely
-const themeToggleBtn = document.getElementById('theme-toggle');
-if (themeToggleBtn) {
-    themeToggleBtn.addEventListener('change', (e) => {
-        applyTheme(e.target.checked ? 'dark' : 'light');
-    });
-}
-// Dropdown Toggle Open/Close Function
-window.toggleProfileMenu = function () {
-    const popup = document.getElementById("profilePopup");
-    if (popup) {
-        popup.classList.toggle("show");
-    }
-};
-
-// Bahar Click Karne Par Dropdown Automatic Close Karne Ka Handler
-window.addEventListener("click", function (e) {
-    const dropdown = document.querySelector(".profile-dropdown");
-    const popup = document.getElementById("profilePopup");
-
-    // Agar click dropdown button ya popup ke andar na ho
-    if (dropdown && popup && !dropdown.contains(e.target)) {
-        popup.classList.remove("show");
-    }
-});
-
-
-// Initialization
-(function initTheme() {
-    const stored = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const theme = stored || (prefersDark ? 'dark' : 'light');
-    applyTheme(theme);
-})();
-// Page load hone par animations chalane ke liye
-// 1. ScrollTrigger Plugin Register Karein
-
-
-// --- Global bindings for Modular compatibility ---
-window.logout = logout;
-window.post = post;
-window.addImg = addImg;
-window.previewFile = previewFile;
-window.applycolor = applycolor;
-window.editPost = editPost;
-window.delpost = delpost;
-window.searchPosts = searchPosts;
+// Window Bindings (Module Scope Fix)
 window.applyTheme = applyTheme;
 window.toggleTheme = toggleTheme;
-window.toggleProfileMenu = toggleProfileMenu;
+
+// Window Bindings for ES Module Scope Compatibility
+window.searchPosts = searchPosts;
+window.post = post;
 window.toggleLike = toggleLike;
-window.fetchLikeCounts = fetchLikeCounts;
 window.toggleCommentSection = toggleCommentSection;
 window.addComment = addComment;
-window.fetchComments = fetchComments;
-window.createPostCard = createPostCard;
-window.realTimePost = realTimePost;
-window.realTimeLikes = realTimeLikes;
+window.editComment = editComment;
 window.deleteComment = deleteComment;
-window.loadUserProfile = loadUserProfile;
-// 1. Plugins Register Karein
-/* ===================================================
-   POSTIFY APP - GSAP STRING EFFECT & POINTER
-   =================================================== */
-
+window.editPost = editPost;
+window.delpost = delpost;
+window.applycolor = applycolor;
+window.addImg = addImg;
+window.previewFile = previewFile;
+window.initProfileDropdown = initProfileDropdown;
+window.applyTheme = applyTheme;
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. FOOLPROOF POINTER MOVEMENT
+
+    if (typeof gsap === "undefined") {
+        console.warn("GSAP is not loaded.");
+        return;
+    }
+
     let pointer = document.getElementById("pointer");
 
-    // Agar HTML mein pointer missing ho toh khud create kar dega
     if (!pointer) {
         pointer = document.createElement("div");
         pointer.id = "pointer";
         document.body.appendChild(pointer);
     }
 
-    // Pointer ko Exact Center align karna
-    gsap.set(pointer, { xPercent: -50, yPercent: -50 });
+    gsap.set(pointer, {
+        xPercent: -50,
+        yPercent: -50
+    });
 
-    // Direct Mouse Move Listener
     window.addEventListener("mousemove", (e) => {
         gsap.to(pointer, {
             x: e.clientX,
@@ -894,37 +970,42 @@ document.addEventListener("DOMContentLoaded", () => {
             boxShadow: "0 0 25px rgba(16, 185, 129, 1)"
         });
     });
-    // 3. SAFE ENTRANCE TIMELINE (Fixes Hidden Navbar & Form)
-    if (typeof gsap !== "undefined") {
-        const tl = gsap.timeline({
-            defaults: {
-                ease: "power3.out",
-                duration: 0.8,
-                clearProps: "all" // Animation poori hotey hi saari hidden inline styles remove kar dega
-            }
-        });
 
-        // Step 1: Navbar (Multiple fallbacks for exact tag/class)
-        tl.from("nav, .navbar, .custom-navbar", {
-            y: -50,
+    const tl = gsap.timeline({
+        defaults: {
+            ease: "power3.out",
+            duration: 0.8,
+            clearProps: "all"
+        }
+    });
+
+    tl.from("nav, .navbar, .custom-navbar", {
+        y: -50,
+        opacity: 0
+    })
+    .from(
+        ".col-lg-4, .col-md-6:first-child, .create-post-card, .form-container",
+        {
+            x: -50,
             opacity: 0
-        })
-            // Step 2: Left Side Form Container
-            .from(".col-lg-4, .col-md-6:first-child, .create-post-card, .form-container", {
-                x: -50,
-                opacity: 0
-            }, "-=0.4")
-            // Step 3: Search Box
-            .from(".search-box", {
-                y: -20,
-                opacity: 0
-            }, "-=0.3")
-            // Step 4: Feed Cards
-            .from(".card", {
-                y: 30,
-                opacity: 0,
-                stagger: 0.12
-            }, "-=0.3");
-    }
-
+        },
+        "-=0.4"
+    )
+    .from(
+        ".search-box",
+        {
+            y: -20,
+            opacity: 0
+        },
+        "-=0.3"
+    )
+    .from(
+        ".card",
+        {
+            y: 30,
+            opacity: 0,
+            stagger: 0.12
+        },
+        "-=0.3"
+    );
 });

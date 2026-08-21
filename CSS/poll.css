@@ -1,0 +1,464 @@
+/* =========================================================
+   POLL PAGE CORE STYLES & THEMING
+========================================================= */
+
+:root {
+    --poll-bg: #f8fafc;
+    --poll-card: #ffffff;
+    --poll-border: #e2e8f0;
+
+    --poll-text: #0f172a;
+    --poll-muted: #64748b;
+
+    --poll-input-bg: #ffffff;
+    --poll-input-border: #cbd5e1;
+    --poll-input-text: #0f172a;
+    --poll-placeholder: #94a3b8;
+
+    --poll-primary: #00d6a3;
+    --poll-primary-hover: #00bd91;
+
+    --poll-option-bg: #f8fafc;
+    --poll-progress-bg: #e2e8f0;
+
+    --poll-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+
+    /* Dynamic Dropdown Variables for Light Mode */
+    --dd-bg: #ffffff;
+    --dd-border: #e2e8f0;
+    --dd-text: #0f172a;
+    --dd-muted: #64748b;
+    --dd-hover-bg: #f1f5f9;
+}
+
+[data-theme="dark"] {
+    --poll-bg: #080f1f;
+    --poll-card: #0d1830;
+    --poll-border: #22314d;
+
+    --poll-text: #f8fafc;
+    --poll-muted: #94a3b8;
+
+    --poll-input-bg: #080f1f;
+    --poll-input-border: #22314d;
+    --poll-input-text: #f8fafc;
+    --poll-placeholder: #a0aec0;
+
+    --poll-primary: #00d6a3;
+    --poll-primary-hover: #00bd91;
+
+    --poll-option-bg: #111d35;
+    --poll-progress-bg: #1e2d48;
+
+    --poll-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+
+    /* Dynamic Dropdown Variables for Dark Mode */
+    --dd-bg: #0d1830;
+    --dd-border: #22314d;
+    --dd-text: #f8fafc;
+    --dd-muted: #94a3b8;
+    --dd-hover-bg: #111d35;
+}
+
+/* =========================================================
+   BODY & CONTAINERS
+========================================================= */
+
+body {
+    background-color: var(--poll-bg);
+    color: var(--poll-text);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+main.container {
+    max-width: 1280px;
+}
+
+/* =========================================================
+   CARDS & FORMS
+========================================================= */
+
+.card {
+    background-color: var(--poll-card);
+    border: 1px solid var(--poll-border);
+    color: var(--poll-text);
+    box-shadow: var(--poll-shadow);
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#createPollForm,
+h4, h5, .card-title, .form-label {
+    color: var(--poll-text) !important;
+}
+
+.form-control {
+    background-color: var(--poll-input-bg);
+    border: 1px solid var(--poll-input-border);
+    color: var(--poll-input-text);
+    border-radius: 8px;
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+
+.form-control:focus {
+    background-color: var(--poll-input-bg);
+    color: var(--poll-input-text);
+    border-color: var(--poll-primary);
+    box-shadow: 0 0 0 0.2rem rgba(0, 214, 163, 0.15);
+}
+
+.form-control::placeholder {
+    color: var(--poll-placeholder) !important;
+}
+
+/* Option Input Dynamics */
+.option-input-group {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.option-input-group .form-control {
+    margin-bottom: 0;
+}
+
+.remove-option-btn {
+    color: #ef4444;
+    border-color: #ef4444;
+    border-radius: 8px;
+    padding: 0.375rem 0.75rem;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.remove-option-btn:hover {
+    background-color: #ef4444;
+    color: #ffffff;
+}
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+#addOptionBtn {
+    color: var(--poll-primary);
+    border-color: var(--poll-primary);
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+#addOptionBtn:hover {
+    background-color: var(--poll-primary);
+    color: #06121b;
+    transform: translateY(-1px);
+}
+
+.btn-emerald {
+    background-color: var(--poll-primary);
+    border-color: var(--poll-primary);
+    color: #06121b;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-emerald:hover {
+    background-color: var(--poll-primary-hover);
+    border-color: var(--poll-primary-hover);
+    color: #06121b;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(0, 214, 163, 0.2);
+}
+
+.vote-btn {
+    color: var(--poll-primary);
+    border-color: var(--poll-primary);
+    border-radius: 6px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.vote-btn:hover {
+    background-color: var(--poll-primary);
+    color: #06121b;
+}
+
+.vote-btn:disabled,
+.btn-emerald:disabled,
+#addOptionBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Accessibility */
+#addOptionBtn:focus-visible,
+.btn-emerald:focus-visible,
+.vote-btn:focus-visible {
+    outline: 2px solid var(--poll-primary);
+    outline-offset: 2px;
+}
+
+/* =========================================================
+   POLL DISPLAY & PROGRESS
+========================================================= */
+
+#pollsContainer {
+    width: 100%;
+}
+
+.poll-card {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.poll-card .card-body {
+    background-color: var(--poll-card);
+}
+
+.poll-card .card-title {
+    color: var(--poll-text);
+    font-size: 1.2rem;
+    line-height: 1.5;
+}
+
+.poll-card .text-muted,
+.poll-card small {
+    color: var(--poll-muted) !important;
+}
+
+.poll-option {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 0;
+}
+
+.poll-option-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.poll-option-title {
+    font-weight: 600;
+    word-break: break-word;
+    color: var(--poll-text);
+}
+
+.progress {
+    background-color: var(--poll-progress-bg);
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    background-color: var(--poll-primary) !important;
+    border-radius: 20px;
+    transition: width 0.5s ease;
+}
+
+.poll-option .badge.bg-success {
+    background-color: var(--poll-primary) !important;
+    color: #06121b;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+#pollsLoading {
+    color: var(--poll-muted);
+}
+
+#pollsLoading .spinner-border {
+    color: var(--poll-primary) !important;
+}
+
+#pollsContainer .text-center {
+    color: var(--poll-muted);
+}
+
+#pollsContainer .text-center h5 {
+    color: var(--poll-text);
+}
+
+.alert {
+    border-radius: 8px;
+}
+
+/* =========================================================
+   NAVBAR CONSOLIDATED CONTROLS
+========================================================= */
+
+/* Base Navbar Behavior */
+.navbar {
+    background-color: var(--poll-card) !important;
+    border-bottom: 1px solid var(--poll-border);
+}
+
+.navbar .nav-link {
+    color: var(--poll-text) !important;
+    font-weight: 500;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link.active {
+    color: var(--poll-primary) !important;
+}
+
+/* User Trigger Button Styling */
+#profileDropdown,
+.navbar .dropdown-toggle {
+    color: var(--poll-text) !important;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#profileDropdown::after {
+    color: var(--poll-text) !important;
+}
+
+/* Notification Bell Styling */
+#notifDropdown,
+#notifDropdown i {
+    color: var(--poll-text) !important;
+    transition: color 0.25s ease;
+}
+
+#notifDropdown:hover i {
+    color: var(--poll-primary) !important;
+}
+
+/* Forced White Bell in Dark Mode */
+[data-theme="dark"] #notifDropdown,
+[data-theme="dark"] #notifDropdown i {
+    color: #ffffff !important;
+}
+
+/* =========================================================
+   DROPDOWN MENU THEME SYNC (DYNAMIC VARS FIX)
+========================================================= */
+
+.dropdown-menu {
+    background-color: var(--dd-bg) !important;
+    border: 1px solid var(--dd-border) !important;
+    box-shadow: var(--poll-shadow) !important;
+}
+
+.dropdown-menu .dropdown-item,
+.dropdown-menu h6,
+.dropdown-menu strong {
+    color: var(--dd-text) !important;
+}
+
+.dropdown-menu .text-muted,
+.dropdown-menu small,
+.dropdown-menu span:not(.badge) {
+    color: var(--dd-muted) !important;
+}
+
+.dropdown-menu .dropdown-item:hover {
+    background-color: var(--dd-hover-bg) !important;
+    color: var(--poll-primary) !important;
+}
+
+.dropdown-menu .dropdown-item.text-danger,
+.dropdown-menu .text-danger {
+    color: #ef4444 !important;
+}
+
+/* =========================================================
+   SWEETALERT2 DARK OVERRIDES
+========================================================= */
+
+[data-theme="dark"] .swal2-popup {
+    background-color: var(--poll-card) !important;
+    color: var(--poll-text) !important;
+    border: 1px solid var(--poll-border);
+}
+
+[data-theme="dark"] .swal2-title,
+[data-theme="dark"] .swal2-html-container {
+    color: var(--poll-text) !important;
+}
+
+[data-theme="dark"] .swal2-confirm {
+    background-color: var(--poll-primary) !important;
+    color: #06121b !important;
+}
+
+/* =========================================================
+   RESPONSIVE BREAKPOINTS
+========================================================= */
+
+@media (max-width: 991.98px) {
+    main.container {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    main.container {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .card {
+        border-radius: 8px;
+    }
+
+    .card-body {
+        padding: 18px !important;
+    }
+
+    .poll-card .card-title {
+        font-size: 1.05rem;
+    }
+
+    #addOptionBtn {
+        width: auto;
+    }
+
+    .btn-emerald {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+}
+/* =========================================================
+   PROFILE NAME TEXT STYLING
+========================================================= */
+
+.profile-name {
+    font-size: 0.95rem;
+    font-weight: 900 !important;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    transition: color 0.25s ease;
+}
+
+/* Light Mode: Clear Dark Slate Text */
+[data-theme="light"] .profile-name,
+body:not([data-theme="dark"]) .profile-name {
+    color: #0f172a !important;
+}
+
+/* Dark Mode: Crisp Pure White Text */
+[data-theme="dark"] .profile-name {
+    color: #ffffff !important;
+}
+/* Light Mode (jab data-theme="light" ho) */
+[data-theme="light"] .navbar, 
+[data-theme="light"] .navbar-nav .nav-link,
+[data-theme="light"] .bi-bell, 
+[data-theme="light"] .bi-bell-fill,
+[data-theme="light"] .user-name-text {
+    color: #0f172a !important; /* Dark color for light theme */
+}
+
+/* Dark Mode (jab data-theme="dark" ho) */
+[data-theme="dark"] .navbar, 
+[data-theme="dark"] .navbar-nav .nav-link,
+[data-theme="dark"] .bi-bell, 
+[data-theme="dark"] .bi-bell-fill,
+[data-theme="dark"] .user-name-text {
+    color: #ffffff !important; /* White color for dark theme */
+}
