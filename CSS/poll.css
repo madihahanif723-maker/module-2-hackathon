@@ -462,3 +462,91 @@ body:not([data-theme="dark"]) .profile-name {
 [data-theme="dark"] .user-name-text {
     color: #ffffff !important; /* White color for dark theme */
 }
+.form-control {
+    background-color: var(--poll-input-bg);
+    border: 1px solid var(--poll-input-border);
+    color: var(--poll-input-text);
+    border-radius: 8px;
+    padding: 0.625rem 0.875rem; /* Added custom padding for proper vertical alignment */
+    font-size: 0.95rem;
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+/* Card Elevation & Glassy Borders */
+.card, .poll-card {
+    border: 1px solid var(--poll-border) !important;
+    border-radius: 14px !important;
+    backdrop-filter: blur(8px);
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.poll-card:hover {
+    border-color: rgba(0, 214, 163, 0.35) !important;
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+/* Emerald Primary Button Upgrade */
+.btn-emerald {
+    background: linear-gradient(135deg, #00d6a3 0%, #00b386 100%) !important;
+    border: none !important;
+    color: #06121b !important;
+    font-weight: 700 !important;
+    padding: 0.75rem 1.25rem !important;
+    border-radius: 10px !important;
+    letter-spacing: 0.3px;
+    box-shadow: 0 4px 15px rgba(0, 214, 163, 0.25);
+}
+
+.btn-emerald:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 22px rgba(0, 214, 163, 0.4) !important;
+}
+/* Progress Bar Polish */
+.progress {
+    height: 10px !important;
+    background-color: var(--poll-progress-bg) !important;
+    border-radius: 50px !important;
+    margin-top: 6px;
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, #00d6a3, #00f2b8) !important;
+    border-radius: 50px !important;
+    transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+/* Navbar Perfect Alignment */
+.navbar .container, 
+.navbar .container-fluid {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-nav {
+    align-items: center;
+    gap: 10px;
+}
+
+#notifDropdown, .profile-name {
+    display: flex;
+    align-items: center;
+}
+/* Active Tab Style - Matching Study Partner Badge */
+.navbar-nav .nav-link.active,
+.navbar-nav .show > .nav-link {
+    background-color: rgba(0, 214, 163, 0.12) !important;
+    color: #00d6a3 !important;
+    border: 1px solid rgba(0, 214, 163, 0.3) !important;
+    border-radius: 8px !important;
+    padding: 6px 16px !important;
+    font-weight: 600 !important;
+    box-shadow: 0 0 12px rgba(0, 214, 163, 0.15);
+}
+
+/* Normal Nav Links (Inactive State) */
+.navbar-nav .nav-link {
+    padding: 6px 16px !important;
+    transition: all 0.25s ease;
+}
+
+.navbar-nav .nav-link:hover:not(.active) {
+    color: #00d6a3 !important;
+}

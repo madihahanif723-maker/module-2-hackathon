@@ -893,39 +893,72 @@ function applycolor(element) {
     selectedTextColor = element.getAttribute("data-color") || element.style.backgroundColor || window.getComputedStyle(element).backgroundColor || "#ffffff";
 }
 
-// Theme Apply Function
+
 function applyTheme(theme) {
     document.documentElement.setAttribute("data-theme", theme);
     document.body.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
 
+    // Sync Checkbox Pill Switch State
     const themeToggleBtn = document.getElementById('theme-toggle');
     if (themeToggleBtn) {
         themeToggleBtn.checked = (theme === "dark");
     }
 
+    // Sync Old Theme Icon (if used somewhere)
     const icon = document.getElementById("themeIcon");
     if (icon) {
-        icon.className = theme === "dark" ? "bi bi-moon-stars-fill" : "bi bi-sun-fill";
+        icon.className = theme === "dark" ? "bi bi-sun-fill" : "bi bi-moon-fill";
+        icon.style.setProperty('color', '#ffffff', 'important');
     }
 
-    // Dynamic Post Card Email Color Update
-    document.querySelectorAll(".email-text-element").forEach(el => {
-        el.style.color = (theme === "dark") ? "#cbd5e1" : "#475569";
+    const emailElements = document.querySelectorAll('.email-text-element');
+    emailElements.forEach(el => {
+        el.style.setProperty('color', (theme === "dark" ? "#cbd5e1" : "#475569"), 'important');
+    });
+    const navUserText = document.querySelectorAll("#navUserName, .user-name, #profileDropdownBtn span");
+  navUserText.forEach(text => {
+    text.style.setProperty(
+      "color",
+      theme === "dark" ? "#ffffff" : "#0f172a",
+      "important"
+    );
+  });
+  const notifBtn = document.getElementById("notifDropdown") || document.getElementById("notifBtn");
+    if (notifBtn) {
+        notifBtn.style.setProperty(
+            "color",
+            theme === "dark" ? "#ffffff" : "#0f172a",
+            "important"
+        );
+    }
+}
+
+// Toggle Function
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute("data-theme");
+    const newTheme = currentTheme === "dark" ? "light" : "dark";
+
+    document.documentElement.setAttribute("data-theme", newTheme);
+    document.body.classList.toggle("dark-mode", newTheme === "dark");
+    localStorage.setItem("theme", newTheme);
+}
+
+// Checkbox Event Handling safely
+const themeToggleBtn = document.getElementById('theme-toggle');
+if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('change', (e) => {
+        applyTheme(e.target.checked ? 'dark' : 'light');
     });
 }
 
-// Global Toggle Handler (HTML onclick ya change event ke liye)
-function toggleTheme() {
-    const currentTheme = localStorage.getItem("theme") || "dark";
-    const newTheme = currentTheme === "dark" ? "light" : "dark";
-    applyTheme(newTheme);
-}
-
-// Window Bindings (Module Scope Fix)
-window.applyTheme = applyTheme;
-window.toggleTheme = toggleTheme;
-
+// Initialization
+(function initTheme() {
+    const stored = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const theme = stored || (prefersDark ? 'dark' : 'light');
+    applyTheme(theme);
+})();
 // Window Bindings for ES Module Scope Compatibility
 window.searchPosts = searchPosts;
 window.post = post;
@@ -941,6 +974,7 @@ window.addImg = addImg;
 window.previewFile = previewFile;
 window.initProfileDropdown = initProfileDropdown;
 window.applyTheme = applyTheme;
+window.toggleTheme = toggleTheme;
 document.addEventListener("DOMContentLoaded", () => {
 
     if (typeof gsap === "undefined") {

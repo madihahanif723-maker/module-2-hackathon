@@ -2,7 +2,8 @@ import supabase from "../supabase.js";
 import { 
   fetchNotifications, 
   markAsRead, 
-  listenForNotifications, 
+  listenForNotifications,
+  renderNotificationsUI, 
   createNotification 
 } from "./notification.js"; // ✅ Matches exact filename
 
@@ -19,7 +20,27 @@ let editIndex = null;
 let edited = false;
 let oldAvatarUrl = "";
 
+// Profile Dropdown Toggle Logic
+document.addEventListener("DOMContentLoaded", () => {
+  const profileBtn = document.getElementById("profileDropdownBtn");
+  const profileMenu = document.getElementById("profileMenu");
 
+  if (profileBtn && profileMenu) {
+    // Dropdown toggle on click
+    profileBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isHidden = profileMenu.style.display === "none" || profileMenu.style.display === "";
+      profileMenu.style.display = isHidden ? "block" : "none";
+    });
+
+    // Close when clicking outside
+    window.addEventListener("click", (e) => {
+      if (!profileMenu.contains(e.target) && !profileBtn.contains(e.target)) {
+        profileMenu.style.display = "none";
+      }
+    });
+  }
+});
 // =====================================================
 // PROFILE DROPDOWN
 // =====================================================
@@ -299,11 +320,6 @@ async function fetchStudyPartners() {
     console.error("Fetch Study Partners Error:", error);
   }
 }
-
-
-// =====================================================
-// CREATE PARTNER CARD
-// =====================================================
 
 // =====================================================
 // CREATE PARTNER CARD
@@ -1066,6 +1082,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   realTimeStudyPartners();
   initAnimations();
 });
+
 
 // Window Exports
 window.logout = logout;

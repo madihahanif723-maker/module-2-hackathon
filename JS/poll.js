@@ -1,18 +1,83 @@
 import supabase from "../supabase.js";
+import { 
+  fetchNotifications, 
+  markAsRead, 
+  listenForNotifications, 
+  createNotification 
+} from "./notification.js";
+export async function initNotificationSystem(currentUserId) {
+  if (!currentUserId) return;
 
-// =====================================================
-// GLOBAL STATE
-// =====================================================
+  const notifBtn = document.getElementById("notifBtn");
+  const notifMenu = document.getElementById("notifMenu");
+  const notifBadge = document.getElementById("notifBadge");
+  const notifListContainer = document.getElementById("notifListContainer");
+
+  // Toggle Dropdown Menu
+  if (notifBtn && notifMenu) {
+    notifBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isHidden = notifMenu.style.display === "none" || notifMenu.style.display === "";
+      notifMenu.style.display = isHidden ? "block" : "none";
+    });
+
+    window.addEventListener("click", (e) => {
+      if (!notifMenu.contains(e.target) && !notifBtn.contains(e.target)) {
+        notifMenu.style.display = "none";
+      }
+    });
+  }
+
+  // Load and Render Notifications
+  async function loadUI() {
+    const notifications = await fetchNotifications(currentUserId);
+    const unreadCount = notifications.filter((n) => !n.is_read).length;
+
+    if (notifBadge) {
+      if (unreadCount > 0) {
+        notifBadge.innerText = unreadCount;
+        notifBadge.classList.remove("d-none");
+      } else {
+        notifBadge.classList.add("d-none");
+      }
+    }
+
+    if (notifListContainer) {
+      if (notifications.length === 0) {
+        notifListContainer.innerHTML = `<p class="text-muted small text-center my-2">No notifications yet.</p>`;
+        return;
+      }
+
+      notifListContainer.innerHTML = notifications.map((n) => `
+        <div class="p-2 mb-1 rounded cursor-pointer notif-item ${n.is_read ? 'opacity-50' : 'bg-dark'}" 
+             data-id="${n.id}" style="border-left: 3px solid #00dfa2;">
+          <p class="small text-light mb-0" style="font-size:12px;">${n.message}</p>
+          <small class="text-muted" style="font-size:10px;">${new Date(n.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
+        </div>
+      `).join("");
+
+      // Mark as read on click
+      notifListContainer.querySelectorAll(".notif-item").forEach((item) => {
+        item.addEventListener("click", async () => {
+          await markAsRead(item.dataset.id);
+          loadUI();
+        });
+      });
+    }
+  }
+
+  await loadUI();
+  
+  // Realtime updates listener
+  listenForNotifications(currentUserId, () => loadUI());
+}
 
 let userid = "";
 let userName = "";
 let Email = "";
-
-
 // =====================================================
 // HELPER
 // =====================================================
-
 function escapeHTML(value = "") {
     return String(value)
         .replace(/&/g, "&amp;")
@@ -21,12 +86,9 @@ function escapeHTML(value = "") {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
 }
-
-
 // =====================================================
 // SWEETALERT
 // =====================================================
-
 function showAlert(options = {}) {
 
     const theme =

@@ -568,3 +568,21 @@ body, .card, .form-control, .form-select, nav {
 .profile-popup-menu.show {
   display: block !important;
 }
+/* Dropdown Menu Container */
+.profile-dropdown-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: 8px;
+  z-index: 9999; /* Ensure page ke baaqi elements ke upar aaye */
+  background-color: #0d192e; /* Navy Dark Theme */
+  border: 1px solid #00dfa2;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* JS 'show' class trigger hone par visible hoga */
+.profile-dropdown-menu.show {
+  display: block !important;
+}
