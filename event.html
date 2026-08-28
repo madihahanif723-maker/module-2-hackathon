@@ -23,7 +23,7 @@
         <div class="container-fluid">
 
             <!-- Brand Logo -->
-            <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="welcome.html">
                 <div class="logo-icon-box">
                     <span class="logo-letter">C</span>
                 </div>
@@ -41,16 +41,16 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-lg-2">
                     <li class="nav-item">
-                        <a class="nav-link " href="dashboard.html">Create Post</a>
+                        <a class="nav-link " href="dashboard.html"><i class="bi bi-plus-lg"></i> Create Post</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active " aria-current="page" href="event.html">Create Event</a>
+                        <a class="nav-link active " aria-current="page" href="event.html"><i class="bi bi-calendar-event"></i> Create Event</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="study-partners.html">Find Study Partner</a>
+                        <a class="nav-link" href="study-partners.html"><i class="bi bi-people"></i> Find Study Partner</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link " href="poll.html">Polls</a>
+                        <a class="nav-link " href="poll.html"><i class="bi bi-bar-chart"></i> Polls</a>
                     </li>
                 </ul>
 
@@ -188,6 +188,12 @@
                         <div class="mb-3">
                             <label class="form-label">Banner Image</label>
                             <input type="file" id="imageFile" class="form-control custom-input" accept="image/*">
+                        </div>
+                        <div id="imagePreviewContainer" class="mb-3 d-none">
+                            <label class="form-label small text-muted">Image Preview:</label>
+                            <div class="w-100 rounded overflow-hidden border border-secondary" style="max-height: 180px;">
+                                <img id="imagePreview" src="" alt="Banner Preview" class="w-100 h-100 object-fit-cover">
+                            </div>
                         </div>
 
                         <button type="submit" id="eventBtn" class="btn btn-emerald w-100 mt-2">Publish Event</button>

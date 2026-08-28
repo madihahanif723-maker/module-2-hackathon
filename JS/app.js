@@ -1,6 +1,8 @@
-
-
 import supabase from "../supabase.js";
+import { 
+    initNotificationSystem, 
+    createNotification 
+} from "./notification.js";
 
 let edited = false;
 var selectedTextColor = "";
@@ -176,6 +178,10 @@ async function checkUserSession() {
             if (userEmailText) userEmailText.innerText = user.email;
 
             await loadUserProfileImage(userid);
+
+            if (typeof initNotificationSystem === "function") {
+                await initNotificationSystem(userid);
+            }
         } else {
             window.location.href = "index.html";
         }
@@ -411,6 +417,25 @@ async function addComment(postId) {
         if (error) throw error;
         input.value = "";
 
+        if (typeof createNotification === "function") {
+            const { data: targetPost } = await supabase
+                .from("post_app_table")
+                .select("user_id")
+                .eq("id", postId)
+                .single();
+
+            if (targetPost && targetPost.user_id) {
+                await createNotification({
+                    userId: targetPost.user_id,
+                    actorId: userid,
+                    actorName: userName || "Someone",
+                    type: "comment",
+                    message: `${userName || "Someone"} commented on your post.`,
+                    targetId: postId
+                });
+            }
+        }
+
     } catch (err) {
         console.log("Error inserting comment:", err);
         Swal.fire("Error", "Could not submit your comment.", "error");
@@ -595,6 +620,25 @@ async function toggleLike(postId) {
                 .from("like_table")
                 .insert({ post_id: postId, user_id: userid });
             if (insertError) throw insertError;
+
+            if (typeof createNotification === "function") {
+                const { data: targetPost } = await supabase
+                    .from("post_app_table")
+                    .select("user_id")
+                    .eq("id", postId)
+                    .single();
+
+                if (targetPost && targetPost.user_id) {
+                    await createNotification({
+                        userId: targetPost.user_id,
+                        actorId: userid,
+                        actorName: userName || "Someone",
+                        type: "like",
+                        message: `${userName || "Someone"} liked your post.`,
+                        targetId: postId
+                    });
+                }
+            }
         }
     } catch (err) {
         console.log("Error in toggleLike handling:", err);
@@ -893,19 +937,16 @@ function applycolor(element) {
     selectedTextColor = element.getAttribute("data-color") || element.style.backgroundColor || window.getComputedStyle(element).backgroundColor || "#ffffff";
 }
 
-
 function applyTheme(theme) {
     document.documentElement.setAttribute("data-theme", theme);
     document.body.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
 
-    // Sync Checkbox Pill Switch State
     const themeToggleBtn = document.getElementById('theme-toggle');
     if (themeToggleBtn) {
         themeToggleBtn.checked = (theme === "dark");
     }
 
-    // Sync Old Theme Icon (if used somewhere)
     const icon = document.getElementById("themeIcon");
     if (icon) {
         icon.className = theme === "dark" ? "bi bi-sun-fill" : "bi bi-moon-fill";
@@ -917,14 +958,14 @@ function applyTheme(theme) {
         el.style.setProperty('color', (theme === "dark" ? "#cbd5e1" : "#475569"), 'important');
     });
     const navUserText = document.querySelectorAll("#navUserName, .user-name, #profileDropdownBtn span");
-  navUserText.forEach(text => {
-    text.style.setProperty(
-      "color",
-      theme === "dark" ? "#ffffff" : "#0f172a",
-      "important"
-    );
-  });
-  const notifBtn = document.getElementById("notifDropdown") || document.getElementById("notifBtn");
+    navUserText.forEach(text => {
+        text.style.setProperty(
+            "color",
+            theme === "dark" ? "#ffffff" : "#0f172a",
+            "important"
+        );
+    });
+    const notifBtn = document.getElementById("notifDropdown") || document.getElementById("notifBtn");
     if (notifBtn) {
         notifBtn.style.setProperty(
             "color",
@@ -934,7 +975,6 @@ function applyTheme(theme) {
     }
 }
 
-// Toggle Function
 function toggleTheme() {
     const currentTheme = document.documentElement.getAttribute("data-theme");
     const newTheme = currentTheme === "dark" ? "light" : "dark";
@@ -944,7 +984,6 @@ function toggleTheme() {
     localStorage.setItem("theme", newTheme);
 }
 
-// Checkbox Event Handling safely
 const themeToggleBtn = document.getElementById('theme-toggle');
 if (themeToggleBtn) {
     themeToggleBtn.addEventListener('change', (e) => {
@@ -952,14 +991,13 @@ if (themeToggleBtn) {
     });
 }
 
-// Initialization
 (function initTheme() {
     const stored = localStorage.getItem('theme');
     const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     const theme = stored || (prefersDark ? 'dark' : 'light');
     applyTheme(theme);
 })();
-// Window Bindings for ES Module Scope Compatibility
+
 window.searchPosts = searchPosts;
 window.post = post;
 window.toggleLike = toggleLike;
@@ -975,8 +1013,8 @@ window.previewFile = previewFile;
 window.initProfileDropdown = initProfileDropdown;
 window.applyTheme = applyTheme;
 window.toggleTheme = toggleTheme;
-document.addEventListener("DOMContentLoaded", () => {
 
+document.addEventListener("DOMContentLoaded", () => {
     if (typeof gsap === "undefined") {
         console.warn("GSAP is not loaded.");
         return;

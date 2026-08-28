@@ -5,7 +5,7 @@ import {
   listenForNotifications,
   renderNotificationsUI, 
   createNotification 
-} from "./notification.js"; // ✅ Matches exact filename
+} from "./notification.js"; 
 
 // =====================================================
 // GLOBAL VARIABLES
@@ -26,14 +26,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const profileMenu = document.getElementById("profileMenu");
 
   if (profileBtn && profileMenu) {
-    // Dropdown toggle on click
     profileBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       const isHidden = profileMenu.style.display === "none" || profileMenu.style.display === "";
       profileMenu.style.display = isHidden ? "block" : "none";
     });
 
-    // Close when clicking outside
     window.addEventListener("click", (e) => {
       if (!profileMenu.contains(e.target) && !profileBtn.contains(e.target)) {
         profileMenu.style.display = "none";
@@ -41,6 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
 // =====================================================
 // PROFILE DROPDOWN
 // =====================================================
@@ -60,7 +59,6 @@ window.addEventListener("click", function (e) {
     popup.classList.remove("show");
   }
 });
-
 
 // =====================================================
 // SWEETALERT THEME
@@ -86,7 +84,6 @@ function showAlert(options = {}) {
   });
 }
 
-
 // =====================================================
 // PROFILE DROPDOWN TOGGLE & EVENT LISTENERS
 // =====================================================
@@ -98,7 +95,6 @@ function initProfileDropdown() {
   const profilePicInput = document.getElementById("profilePicInput");
   const logoutBtn = document.getElementById("logoutBtn");
 
-  // 1. Toggle Dropdown Menu
   if (dropdownBtn && profileMenu) {
     dropdownBtn.addEventListener("click", function (e) {
       e.stopPropagation();
@@ -107,14 +103,12 @@ function initProfileDropdown() {
     });
   }
 
-  // 2. Outside Click Par Dropdown Close Karna
   window.addEventListener("click", function (e) {
     if (profileMenu && !profileMenu.contains(e.target) && !dropdownBtn.contains(e.target)) {
       profileMenu.style.display = "none";
     }
   });
 
-  // 3. Upload Picture Option Handle
   if (uploadPicBtn && profilePicInput) {
     uploadPicBtn.addEventListener("click", function () {
       profilePicInput.click();
@@ -140,13 +134,11 @@ function initProfileDropdown() {
     });
   }
 
-  // 4. Logout Button Event
   if (logoutBtn) {
     logoutBtn.addEventListener("click", logout);
   }
 }
 
-// UI Mein Avatar Image Set Karne Ka Helper
 function updateAvatarUI(url) {
   const userAvatarImg = document.getElementById("userAvatarImg");
   const userInitialText = document.getElementById("userInitialText");
@@ -155,6 +147,33 @@ function updateAvatarUI(url) {
     userAvatarImg.src = url;
     userAvatarImg.classList.remove("d-none");
     userInitialText.classList.add("d-none");
+  }
+}
+
+// =====================================================
+// FORM AVATAR PREVIEW HANDLER (NEW FEATURE)
+// =====================================================
+
+function initFormAvatarPreview() {
+  const inputAvatar = document.getElementById("inputAvatar");
+  const previewContainer = document.getElementById("avatarPreviewContainer");
+  const previewImg = document.getElementById("avatarPreview");
+
+  if (inputAvatar && previewContainer && previewImg) {
+    inputAvatar.addEventListener("change", function (e) {
+      const file = e.target.files[0];
+      if (file && file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          previewImg.src = event.target.result;
+          previewContainer.classList.remove("d-none");
+        };
+        reader.readAsDataURL(file);
+      } else {
+        previewImg.src = "";
+        previewContainer.classList.add("d-none");
+      }
+    });
   }
 }
 
@@ -187,25 +206,21 @@ async function getCurrentUser() {
 
     userRole = user.user_metadata?.role || "";
 
-    // 1. Initial Letter Text Update
     const userInitialText = document.getElementById("userInitialText");
     if (userInitialText) {
       userInitialText.innerText = userName.charAt(0).toUpperCase();
     }
 
-    // 2. Navbar Full Name Update
     const navUserName = document.getElementById("navUserName");
     if (navUserName) {
       navUserName.innerText = userName;
     }
 
-    // 3. Avatar Image Check
     const savedAvatarUrl = user.user_metadata?.avatar_url;
     if (savedAvatarUrl) {
       updateAvatarUI(savedAvatarUrl);
     }
 
-    // 4. Admin Button Toggle
     if (userRole === "admin") {
       const adminBtn = document.getElementById("admin-panel-btn");
       if (adminBtn) adminBtn.classList.remove("d-none");
@@ -242,16 +257,13 @@ window.addEventListener("click", function (e) {
   }
 });
 
-
 // =====================================================
-// SAFE ARRAY PARSER
+// SAFE ARRAY PARSER & ESCAPE HTML
 // =====================================================
 
 function safeParseArray(data) {
   if (!data) return [];
-
   if (Array.isArray(data)) return data;
-
   if (typeof data === "string") {
     try {
       const parsed = JSON.parse(data);
@@ -263,14 +275,8 @@ function safeParseArray(data) {
         .filter(Boolean);
     }
   }
-
   return [];
 }
-
-
-// =====================================================
-// ESCAPE HTML
-// =====================================================
 
 function escapeHTML(value) {
   return String(value ?? "")
@@ -280,7 +286,6 @@ function escapeHTML(value) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
 }
-
 
 // =====================================================
 // FETCH STUDY PARTNERS
@@ -330,7 +335,6 @@ function createPartnerCard(partner) {
   const skills = safeParseArray(partner.skills);
   const name = partner.full_name || "Anonymous";
 
-  // Dynamic initial avatar as fallback
   const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=00dfa2&color=080f1f`;
   const avatar = partner.avatar_url || fallbackAvatar;
   
@@ -462,7 +466,6 @@ function createPartnerCard(partner) {
   `;
 }
 
-
 // =====================================================
 // RENDER PARTNERS
 // =====================================================
@@ -493,7 +496,6 @@ function renderStudyPartners(partners) {
 
   container.appendChild(fragment);
 
-  // Bind Listeners
   container.querySelectorAll(".connect-btn").forEach(button => {
     button.addEventListener("click", () => connectPartner(button.dataset.id, button.dataset.name));
   });
@@ -521,7 +523,6 @@ function renderStudyPartners(partners) {
     );
   }
 }
-
 
 // =====================================================
 // SEARCH & FILTER
@@ -553,7 +554,6 @@ function filterPartners() {
 
   renderStudyPartners(filtered);
 }
-
 
 // =====================================================
 // UPLOAD PROFILE IMAGE
@@ -596,7 +596,6 @@ async function uploadAvatar(file) {
 
   return data.publicUrl;
 }
-
 
 // =====================================================
 // SAVE STUDY PARTNER
@@ -707,7 +706,6 @@ async function saveStudyPartner(e) {
   }
 }
 
-
 // =====================================================
 // RESET FORM
 // =====================================================
@@ -720,12 +718,19 @@ function resetPartnerForm() {
   editIndex = null;
   oldAvatarUrl = "";
 
+  // Reset Image Preview Box
+  const previewContainer = document.getElementById("avatarPreviewContainer");
+  const previewImg = document.getElementById("avatarPreview");
+  if (previewContainer && previewImg) {
+    previewImg.src = "";
+    previewContainer.classList.add("d-none");
+  }
+
   const button = document.querySelector("#partnerForm button[type='submit']");
   if (button) {
     button.innerHTML = `<i class="fa-solid fa-check me-1"></i> Save Profile`;
   }
 }
-
 
 // =====================================================
 // EDIT PARTNER
@@ -755,6 +760,17 @@ async function editPartner(id) {
   edited = true;
   editIndex = id;
 
+  // Set existing image preview if available
+  const previewContainer = document.getElementById("avatarPreviewContainer");
+  const previewImg = document.getElementById("avatarPreview");
+  if (oldAvatarUrl && previewContainer && previewImg) {
+    previewImg.src = oldAvatarUrl;
+    previewContainer.classList.remove("d-none");
+  } else if (previewContainer && previewImg) {
+    previewImg.src = "";
+    previewContainer.classList.add("d-none");
+  }
+
   const form = document.getElementById("partnerForm");
   if (form) {
     form.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -765,7 +781,6 @@ async function editPartner(id) {
     button.innerHTML = `<i class="fa-solid fa-pen me-1"></i> Update Profile`;
   }
 }
-
 
 // =====================================================
 // DELETE PARTNER
@@ -819,7 +834,6 @@ async function deletePartner(id) {
   await fetchStudyPartners();
 }
 
-
 // =====================================================
 // CONNECT PARTNER
 // =====================================================
@@ -845,7 +859,6 @@ async function connectPartner(targetUserId, name) {
 
   if (!result.isConfirmed) return;
 
-  // Send Database Notification
   if (targetUserId) {
     await createNotification({
       userId: targetUserId,
@@ -865,7 +878,6 @@ async function connectPartner(targetUserId, name) {
   });
 }
 
-
 // =====================================================
 // REALTIME
 // =====================================================
@@ -882,7 +894,6 @@ function realTimeStudyPartners() {
     )
     .subscribe();
 }
-
 
 // =====================================================
 // LOGOUT
@@ -905,7 +916,6 @@ async function logout() {
 
   window.location.href = "index.html";
 }
-
 
 // =====================================================
 // THEME MANAGEMENT
@@ -943,7 +953,6 @@ function initTheme() {
   }
 }
 
-
 // =====================================================
 // GSAP ANIMATIONS
 // =====================================================
@@ -978,7 +987,6 @@ function initAnimations() {
     .from(".filter-card", { y: -20, opacity: 0 }, "-=0.3");
 }
 
-
 // =====================================================
 // NOTIFICATION SYSTEM UI
 // =====================================================
@@ -991,7 +999,6 @@ export async function initNotificationSystem(currentUserId) {
   const notifBadge = document.getElementById("notifBadge");
   const notifListContainer = document.getElementById("notifListContainer");
 
-  // Dropdown Toggle
   if (notifBtn && notifMenu) {
     notifBtn.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -1006,12 +1013,10 @@ export async function initNotificationSystem(currentUserId) {
     });
   }
 
-  // Load Function
   async function loadUI() {
     const notifications = await fetchNotifications(currentUserId);
     const unreadCount = notifications.filter(n => !n.is_read).length;
 
-    // Badge Update
     if (notifBadge) {
       if (unreadCount > 0) {
         notifBadge.innerText = unreadCount;
@@ -1021,7 +1026,6 @@ export async function initNotificationSystem(currentUserId) {
       }
     }
 
-    // List Update
     if (notifListContainer) {
       if (notifications.length === 0) {
         notifListContainer.innerHTML = `<p class="text-muted small text-center my-2">No notifications</p>`;
@@ -1036,7 +1040,6 @@ export async function initNotificationSystem(currentUserId) {
         </div>
       `).join("");
 
-      // Read Event
       notifListContainer.querySelectorAll(".notif-item").forEach(item => {
         item.addEventListener("click", async () => {
           await markAsRead(item.dataset.id);
@@ -1046,11 +1049,9 @@ export async function initNotificationSystem(currentUserId) {
     }
   }
 
-  // Initial Load & Realtime Listener
   await loadUI();
   listenForNotifications(currentUserId, () => loadUI());
 }
-
 
 // =====================================================
 // INITIALIZATION
@@ -1059,6 +1060,8 @@ export async function initNotificationSystem(currentUserId) {
 document.addEventListener("DOMContentLoaded", async function () {
   initTheme();
   initProfileDropdown();
+  initFormAvatarPreview(); // Preview Handler Injected
+
   const currentUser = await getCurrentUser();
 
   if (currentUser) {
@@ -1082,7 +1085,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   realTimeStudyPartners();
   initAnimations();
 });
-
 
 // Window Exports
 window.logout = logout;

@@ -1488,142 +1488,96 @@ function renderPolls(polls) {
 // SUBMIT VOTE
 // =====================================================
 
-async function submitVote(
-    pollId,
-    optionId
-) {
+// =====================================================
+// SUBMIT VOTE (WITH NOTIFICATION)
+// =====================================================
 
+async function submitVote(pollId, optionId) {
     if (!userid) {
-
         await showAlert({
-
             icon: "warning",
-
             title: "Login Required",
-
-            text:
-                "Please login first."
-
+            text: "Please login first."
         });
-
         return;
     }
 
-
     try {
-
         // Disable buttons
         document
-            .querySelectorAll(
-                `.vote-btn[data-poll-id="${pollId}"]`
-            )
-            .forEach(
-                button => {
-                    button.disabled = true;
-                }
-            );
-
-
-        // Check existing vote first
-        const {
-            data: existingVote,
-            error: checkError
-        } = await supabase
-            .from("poll_votes")
-            .select("id")
-            .eq(
-                "poll_id",
-                pollId
-            )
-            .eq(
-                "user_id",
-                userid
-            )
-            .maybeSingle();
-
-
-        if (checkError) {
-            throw checkError;
-        }
-
-
-        if (existingVote) {
-
-            await showAlert({
-
-                icon: "info",
-
-                title: "Already Voted",
-
-                text:
-                    "You have already voted on this poll."
-
+            .querySelectorAll(`.vote-btn[data-poll-id="${pollId}"]`)
+            .forEach(button => {
+                button.disabled = true;
             });
 
-            await fetchPolls();
+        // Check existing vote first
+        const { data: existingVote, error: checkError } = await supabase
+            .from("poll_votes")
+            .select("id")
+            .eq("poll_id", pollId)
+            .eq("user_id", userid)
+            .maybeSingle();
 
+        if (checkError) throw checkError;
+
+        if (existingVote) {
+            await showAlert({
+                icon: "info",
+                title: "Already Voted",
+                text: "You have already voted on this poll."
+            });
+            await fetchPolls();
             return;
         }
 
-
         // Insert vote
-        const {
-            error: voteError
-        } = await supabase
+        const { error: voteError } = await supabase
             .from("poll_votes")
             .insert({
-                poll_id:
-                    Number(pollId),
-
-                option_id:
-                    Number(optionId),
-
-                user_id:
-                    userid
+                poll_id: Number(pollId),
+                option_id: Number(optionId),
+                user_id: userid
             });
 
+        if (voteError) throw voteError;
 
-        if (voteError) {
-            throw voteError;
+        // ---------------------------------------------
+        // NOTIFICATION LOGIC FOR POLL OWNER
+        // ---------------------------------------------
+        const { data: pollData } = await supabase
+            .from("polls")
+            .select("user_id, question")
+            .eq("id", pollId)
+            .single();
+
+        if (pollData && pollData.user_id) {
+            await createNotification({
+                userId: pollData.user_id, // Poll ke creator ki ID
+                actorId: userid,          // Jisne vote kiya uski ID
+                actorName: userName,      // Jisne vote kiya uska Naame
+                type: "poll_vote",
+                message: `${userName} voted on your poll: "${pollData.question}"`,
+                targetId: pollId
+            });
         }
 
-
         await showAlert({
-
             icon: "success",
-
             title: "Vote Recorded!",
-
             timer: 1200,
-
             showConfirmButton: false
-
         });
-
 
         await fetchPolls();
 
-
     } catch (error) {
-
-        console.error(
-            "Vote Error:",
-            error
-        );
-
+        console.error("Vote Error:", error);
 
         await showAlert({
-
             icon: "error",
-
             title: "Vote Failed",
-
-            text:
-                error.message ||
-                "Could not submit vote."
-
+            text: error.message || "Could not submit vote."
         });
-
 
         await fetchPolls();
     }
@@ -1821,38 +1775,33 @@ function setupPollForm() {
 // INITIALIZE
 // =====================================================
 
-document.addEventListener(
-    "DOMContentLoaded",
-    async () => {
+// =====================================================
+// INITIALIZE
+// =====================================================
 
-        // Theme
-        initTheme();
+document.addEventListener("DOMContentLoaded", async () => {
+    // Theme
+    initTheme();
 
+    // Profile dropdown
+    initProfileDropdown();
 
-        // Profile dropdown
-        initProfileDropdown();
+    // Dynamic options
+    setupDynamicOptions();
 
+    // Poll form
+    setupPollForm();
 
-        // Dynamic options
-        setupDynamicOptions();
+    // Session
+    const loggedIn = await checkUserSession();
 
-
-        // Poll form
-        setupPollForm();
-
-
-        // Session
-        const loggedIn =
-            await checkUserSession();
-
-
-        if (!loggedIn) {
-            return;
-        }
-
-
-        // Fetch polls
-        await fetchPolls();
-
+    if (!loggedIn) {
+        return;
     }
-);
+
+    // Initialize Notification System for Current User
+    await initNotificationSystem(userid);
+
+    // Fetch polls
+    await fetchPolls();
+});

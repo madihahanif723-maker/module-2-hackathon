@@ -67,10 +67,8 @@ export function listenForNotifications(userId, callback) {
     .subscribe();
 }
 
-// 5. UI Rendering Logic with Click-to-Read Handler
-// UI Rendering Logic for Dropdown
+// 5. UI Rendering Logic for Dropdown
 export function renderNotificationsUI(notifications) {
-  // Fix: Container ID changed to notifListContainer to match your HTML
   const notifContainer = document.getElementById("notifListContainer");
   const notifBadge = document.getElementById("notifBadge");
 
@@ -82,7 +80,6 @@ export function renderNotificationsUI(notifications) {
     return;
   }
 
-  // Count unread notifications for badge
   const unreadCount = notifications.filter((n) => !n.is_read).length;
   if (notifBadge) {
     if (unreadCount > 0) {
@@ -109,7 +106,6 @@ export function renderNotificationsUI(notifications) {
 
   notifContainer.innerHTML = html;
 
-  // Click to mark as read
   notifContainer.querySelectorAll(".dropdown-item").forEach((item) => {
     item.addEventListener("click", async () => {
       const notifId = item.getAttribute("data-id");
@@ -118,5 +114,20 @@ export function renderNotificationsUI(notifications) {
         item.classList.remove("bg-dark");
       }
     });
+  });
+}
+
+// 6. Main Initialization Function (Jo crash ki wajah tha)
+export async function initNotificationSystem(userId) {
+  if (!userId) return;
+
+  // Initial load
+  const initialNotifications = await fetchNotifications(userId);
+  renderNotificationsUI(initialNotifications);
+
+  // Realtime subscription
+  listenForNotifications(userId, async () => {
+    const updatedNotifications = await fetchNotifications(userId);
+    renderNotificationsUI(updatedNotifications);
   });
 }

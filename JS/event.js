@@ -179,6 +179,40 @@ function initGSAPAnimations() {
 }
 
 // ==========================================
+// IMAGE PREVIEW LOGIC
+// ==========================================
+function initImagePreview() {
+    const imageInput = document.getElementById("imageFile") || document.getElementById("eventBannerUrl");
+    const previewContainer = document.getElementById("imagePreviewContainer");
+    const previewImage = document.getElementById("imagePreview");
+
+    if (imageInput && previewContainer && previewImage) {
+        imageInput.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    previewImage.src = event.target.result;
+                    previewContainer.classList.remove("d-none");
+                };
+                reader.readAsDataURL(file);
+            } else {
+                resetImagePreview();
+            }
+        });
+    }
+}
+
+function resetImagePreview() {
+    const previewContainer = document.getElementById("imagePreviewContainer");
+    const previewImage = document.getElementById("imagePreview");
+    if (previewContainer && previewImage) {
+        previewImage.src = "";
+        previewContainer.classList.add("d-none");
+    }
+}
+
+// ==========================================
 // 2. PROFILE PICTURE LOGIC
 // ==========================================
 
@@ -243,7 +277,8 @@ async function uploadProfilePicture(e) {
         if (userInitialText) userInitialText.classList.add("d-none");
 
         if (typeof Swal !== "undefined") {
-            Swal.fire({ icon: 'success', title: 'Profile Picture Updated!', timer: 1500, showConfirmButton: false });
+            Swal.fire({ icon: 'success', title: 'Profile Picture Updated!', timer: 1500,
+                 showConfirmButton: false });
         } else {
             alert("Profile Picture Updated!");
         }
@@ -489,6 +524,8 @@ async function createEvent(e) {
         if (locationInput) locationInput.value = "";
         if (imageInput) imageInput.value = "";
 
+        resetImagePreview();
+
         await fetchAndRenderEvents();
 
     } catch (err) {
@@ -541,6 +578,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initTheme();
     initProfileDropdown();
     initGSAPAnimations();
+    initImagePreview();
 
     const themeToggleBtn = document.getElementById('theme-toggle');
     if (themeToggleBtn) {
@@ -569,11 +607,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const createForm = document.getElementById("createEventForm") || document.querySelector("form");
     if (createForm) {
         createForm.addEventListener("submit", createEvent);
-    }
-
-    const publishBtn = document.getElementById("eventBtn") || document.getElementById("publishEventBtn");
-    if (publishBtn) {
-        publishBtn.addEventListener("click", createEvent);
     }
 });
 

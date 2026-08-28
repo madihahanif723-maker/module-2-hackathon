@@ -46,16 +46,16 @@
                 <!-- Navigation Links -->
                 <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-lg-2">
                     <li class="nav-item">
-                        <a class="nav-link" href="dashboard.html">Create Post</a>
+                        <a class="nav-link" href="dashboard.html"><i class="bi bi-plus-lg"></i> Create Post</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="event.html">Create Event</a>
+                        <a class="nav-link" href="event.html"><i class="bi bi-calendar-event"></i> Create Event</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="study-partners.html">Find Study Partner</a>
+                        <a class="nav-link" href="study-partners.html"><i class="bi bi-people"></i> Find Study Partner</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="poll.html">Polls</a>
+                        <a class="nav-link active" aria-current="page" href="poll.html"><i class="bi bi-bar-chart"></i> Polls</a>
                     </li>
                 </ul>
 
@@ -68,15 +68,16 @@
                     </a>
 
                     <!-- NOTIFICATION -->
-                    <div class="dropdown">
-                        <button class="btn btn-link position-relative p-0 border-0" type="button" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-bell-fill fs-5"></i>
-                            <span id="notifCount" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display:none; font-size:0.65rem;">0</span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end shadow mt-2" aria-labelledby="notifDropdown" id="notificationsList" style="width:300px; max-height:380px; overflow-y:auto;">
-                            <li class="dropdown-item text-muted text-center py-2">No new notifications</li>
-                        </ul>
-                    </div>
+                  <!-- NOTIFICATION -->
+<div class="dropdown">
+    <button class="btn btn-link position-relative p-0 border-0" type="button" id="notifBtn" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-bell-fill fs-5"></i>
+        <span id="notifBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" style="font-size:0.65rem;">0</span>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end shadow mt-2" aria-labelledby="notifBtn" id="notifListContainer" style="width:300px; max-height:380px; overflow-y:auto;">
+        <li class="dropdown-item text-muted text-center py-2">No new notifications</li>
+    </ul>
+</div>
 
                     <!-- THEME SWITCH -->
                     <div class="theme-switch-wrapper">
